@@ -1,4 +1,4 @@
-export default function Paths() {
+export default function LearningPathsPage() {
     return (
         <h1>Paths Page</h1>
     )

@@ -1,20 +1,22 @@
 import Header from "./components/Header"
 import {BrowserRouter, Routes, Route} from "react-router-dom"
-import Dashboard from "./components/pages/Dashboard"
-import Paths from "./components/pages/Paths"
-import Skills from "./components/pages/Skills"
-import Profile from "./components/pages/Profile"
+import DashboardPage from "./pages/DashboardPage"
+import LearningPathsPage from "./pages/LearningPathsPage"
+import NotFoundPage from "./pages/NotFoundPage"
+import ProfilePage from "./pages/ProfilePage"
+import SkillsPage from "./pages/SkillsPage"
 
 export default function App() {
   return (
     <BrowserRouter>
       <Header />
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/paths" element={<Paths />} />
-        <Route path="/skills" element={<Skills />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/paths" element={<LearningPathsPage />} />
+        <Route path="/skills" element={<SkillsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )
