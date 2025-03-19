@@ -8,7 +8,6 @@ import SkillsPage from "./pages/SkillsPage"
 import ContactSupportPage from "./pages/ContactSupportPage"
 
 export default function App() {
-  //document.getElementsByTagName("html")[0].setAttribute("data-theme", "retro")
   return (
     <BrowserRouter>
         <Header />
