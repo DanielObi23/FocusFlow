@@ -3,10 +3,11 @@ import logo from "../assets/no_bg_logo.png"
 import avatar from "../assets/avatar.avif"
 
 export default function Header() {
+  //TODO: for header background, consider changing the background to bg-gradient-to-r from-primary to-secondary, after making the whole app
   return (
     <header 
       style={{ fontFamily: "Inter" }} 
-      className="h-35 w-full flex flex-col md:flex-row p-2 items-center justify-between px-6 bg-sky-100 dark:bg-gray-900 dark:text-white"
+      className="h-35 w-full flex flex-col md:flex-row p-2 items-center justify-between px-6 bg-base-300"
     >
       <div className="flex items-center gap-2">
         <Link to="/profile">
@@ -20,9 +21,9 @@ export default function Header() {
       
       <nav className="flex items-center gap-15 font-semibold text-lg mt-5 md:text-xl md:me-4">
         <div className="flex gap-10 lg:gap-6">
-          <Link to="/dashboard" className="focus:outline-2 focus:border-b-0 focus:outline-offset-7 hover:text-sky-700 dark:hover:text-sky-300 hover:border-b-2 border-black dark:border-white hover:mx-3 duration-350 ease-in">Dashboard</Link>
-          <Link to="/paths" className="focus:outline-2 focus:border-b-0 focus:outline-offset-7 hover:text-sky-700 dark:hover:text-sky-300 hover:border-b-2 border-black dark:border-white hover:mx-3 duration-350 ease-in"><span className="hidden xl:inline">Learning</span> Paths</Link>
-          <Link to="/skills" className="focus:outline-2 focus:border-b-0 focus:outline-offset-7 hover:text-sky-700 dark:hover:text-sky-300 hover:border-b-2 border-black dark:border-white hover:mx-3 duration-350 ease-in"><span className="hidden xl:inline">My</span> Skills</Link>
+          <Link to="/dashboard" className="focus:outline-2 focus:border-b-0 focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in">Dashboard</Link>
+          <Link to="/paths" className="focus:outline-2 focus:border-b-0 focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in"><span className="hidden xl:inline">Learning</span> Paths</Link>
+          <Link to="/skills" className="focus:outline-2 focus:border-b-0 focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in"><span className="hidden xl:inline">My</span> Skills</Link>
         </div>
         <Link to="/profile" className="lg:ms-20 lg:me-10 hidden lg:block">
           <img src={avatar} alt="profile settings" className="size-15 lg:size-15 rounded-full"/>

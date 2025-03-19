@@ -8,20 +8,20 @@ import SkillsPage from "./pages/SkillsPage"
 import ContactSupportPage from "./pages/ContactSupportPage"
 
 export default function App() {
+  //document.getElementsByTagName("html")[0].setAttribute("data-theme", "retro")
   return (
     <BrowserRouter>
-      <Header />
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/paths" element={<LearningPathsPage />} />
-        <Route path="/skills" element={<SkillsPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/support" element={<ContactSupportPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+        <Header />
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/paths" element={<LearningPathsPage />} />
+          <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/support" element={<ContactSupportPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
     </BrowserRouter>
   )
 }
-
 
