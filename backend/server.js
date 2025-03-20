@@ -39,12 +39,14 @@ async function initDB() {
         await sql`
         CREATE TABLE IF NOT EXISTS users (
             user_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+            username VARCHAR(255) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
-            username VARCHAR(255) NOT NULL,
+            password_reset_token VARCHAR(255),
+            password_reset_expires TIMESTAMP,
             google_id VARCHAR(255) UNIQUE,
             linkedin_id VARCHAR(255) UNIQUE,
-            profile_image VARCHAR(255),
+            profile_image BYTEA,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         )`
         console.log("Database initialized successfully")

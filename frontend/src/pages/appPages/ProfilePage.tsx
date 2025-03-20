@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 import axios from "axios"
-import ThemeController from "../components/ThemeController"
+import ThemeController from "../../components/ThemeController"
 import { Link } from 'react-router-dom';
 
 export default function ProfilePage() {
