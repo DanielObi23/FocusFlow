@@ -1,7 +1,7 @@
 import { FaPalette } from 'react-icons/fa';
-import { useState, useEffect } from "react"
+import { useState, useEffect} from "react";
 
-//use claude ai to generate this to save time
+//used claude ai to generate this to save time
 
 // All available daisyUI themes
 const allThemes = [
@@ -69,7 +69,6 @@ export default function ThemeController() {
   }, [theme]);
 
   document.getElementsByTagName("html")[0].setAttribute("data-theme", theme);
-
   return (
     <div className="dropdown mb-72">
       <div tabIndex={0} role="button" className="btn m-1 rounded-4xl">

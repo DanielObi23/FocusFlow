@@ -22,16 +22,17 @@ FocusFlow Mini helps users develop new skills by creating personalized learning 
 - React with TypeScript
 - Tailwind CSS for styling
 - React Router for navigation
-- shadcn UI component library
+- Daisy UI component library
 
 ### Backend
 - Node.js with Express.js
-- Passport.js for authentication
+- Cookies for authentication and session management
+- localStorage for caching
 - JWT for secure API access
+- arcject for rate-limiting, bot detection and request filtering
 
 ### Database
-- PostgreSQL
-- Prisma ORM for database operations
+- PostgreSQL using neon serverless database (for free hosting)
 
 ### Integrations
 - OpenAI/Claude API for learning path generation

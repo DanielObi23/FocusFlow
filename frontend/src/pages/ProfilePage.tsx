@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react"
 import axios from "axios"
 import ThemeController from "../components/ThemeController"
+import { Link } from 'react-router-dom';
 
 export default function ProfilePage() {
     type userObj = {
@@ -28,6 +29,7 @@ export default function ProfilePage() {
         <h1>Profile Page</h1>
         <h2>Message: {userData.message ? userData.message : "no data"}</h2>
         <ThemeController />
+        <Link to="/logout">Logout</Link>
         </>
     )
 }
