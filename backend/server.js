@@ -37,7 +37,7 @@ async function initDB() {
     try {
         await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`
         await sql`
-        CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS users (
             user_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
             username VARCHAR(255) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
@@ -46,8 +46,12 @@ async function initDB() {
             password_reset_expires TIMESTAMP,
             google_id VARCHAR(255) UNIQUE,
             linkedin_id VARCHAR(255) UNIQUE,
-            profile_image BYTEA,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            profile_image_url VARCHAR(255),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP WITH TIME ZONE,
+            is_active BOOLEAN DEFAULT TRUE,
+            role VARCHAR(50) DEFAULT 'user'
         )`
         console.log("Database initialized successfully")
     } catch (err) {

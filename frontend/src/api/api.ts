@@ -1,13 +1,13 @@
-// src/api/api.ts
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 
-const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+// Create an axios instance
+const api = axios.create({
+  baseURL: '/api',
 });
 
-// Add request interceptor
+// Request interceptor to add the auth token to requests
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+  (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -17,32 +17,31 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add response interceptor for handling token expiration
+// Response interceptor to handle token refresh
 api.interceptors.response.use(
-  (response: AxiosResponse): AxiosResponse => response,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
     
-    // If error is 403 (forbidden) and we haven't tried to refresh the token yet
-    if (error.response?.status === 403 && !originalRequest._retry) {
+    // If the error status is 401 and we haven't already tried to refresh the token
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
-        // Attempt to refresh the token
-        const response = await axios.post('/api/auth/token', {}, {
-          withCredentials: true // Needed for accessing cookies
-        });
-        
+        // Try to refresh the token
+        const response = await axios.get('/api/auth/refresh');
         const { accessToken } = response.data;
+        
+        // Store the new token
         localStorage.setItem('accessToken', accessToken);
         
-        // Update the Authorization header
+        // Set the authorization header
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         
         // Retry the original request
-        return axios(originalRequest);
+        return api(originalRequest);
       } catch (refreshError) {
-        // If refreshing fails, redirect to login
+        // If refresh fails, redirect to login
         localStorage.removeItem('accessToken');
         window.location.href = '/login';
         return Promise.reject(refreshError);
