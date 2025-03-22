@@ -11,7 +11,7 @@ export default async function sendEmail(option) {
     });
 
     const emailOptions = {
-        from: 'Cineflix support<support@cineflix.com',
+        from: 'FocusFlow support<support@focusflow.com',
         to: option.email,
         subject: option.subject,
         text: option.message,

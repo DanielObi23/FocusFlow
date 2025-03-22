@@ -39,11 +39,12 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
     try {        
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUser = await sql`
+        await sql`
             INSERT INTO users (username, email, password)
             VALUES (${req.body.username}, ${req.body.email}, ${hashedPassword})`;
-       
-        res.status(201).json(newUser[0]);
+        await sql`
+            DELETE FROM email_verification WHERE email = ${req.body.email}`
+        res.status(201);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal Server Error" });
@@ -90,7 +91,7 @@ export const verifyOTP = async (req, res) => {
             SELECT * FROM email_verification
             WHERE email = ${email} AND expires > NOW()`;
         if (user.length === 0) {
-            return res.status(404).json({ verified: false });
+            return res.json({ verified: false });
         }
         if (user[0].otp === emailOTP) {
             return res.status(200).json({ 
@@ -169,21 +170,18 @@ export const forgotPassword = async (req, res, next) => {
         SELECT * FROM users
         WHERE email = ${email}`;
         if (user.length === 0) {
-            return res.status(404).json({ message: "User not found" });
+            return res.json({ message: "Invalid Email" });
         }
         const {resetToken, passwordResetToken, passwordResetExpires} = createPasswordResetToken();
-        console.log("database before updated")
-        console.log(resetToken, passwordResetToken, passwordResetExpires)
         await sql`
             UPDATE users
             SET password_reset_token = ${passwordResetToken},
             password_reset_expires = ${passwordResetExpires}
             WHERE user_id = ${user[0].user_id}`;
-            console.log("database updated")
         // sending the plain password reset token to user and saving the encrypted token in database
         const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
         const message = `Forgot your password? reset password by going to: ${resetUrl}
-        \nIf you didn't forget your password, please ignore this email!
+        \nIf you didn't request password change, please ignore this email!
         \nLink valid only for 10 minutes.
         \nOr Create account (account creation link) or login (login link)`;
         try {
@@ -192,10 +190,7 @@ export const forgotPassword = async (req, res, next) => {
                 subject: "Your password reset token (valid for 10 minutes)",
                 message,
             });
-            console.log("email sent")
-            return res.status(200).json({ 
-                status: 'success',
-                message: "Password reset link sent to user" });
+            return res.status(200).json({message: "Email sent" });
         } catch (error) {
             const passwordResetToken = null;
             const passwordResetExpires = null;

@@ -82,8 +82,8 @@ export default function LoginPage() {
               <br/>At least one uppercase letter
             </p>
           </div>
-          
-          <button type="submit" className="btn btn-primary w-full mt-6">
+          <Link to="/forgot-password" className="text-primary my-0">Forgot password? </Link>
+          <button type="submit" className="btn btn-primary w-full mt-4">
             Log In
           </button>
           <p className="text-sm mt-4">

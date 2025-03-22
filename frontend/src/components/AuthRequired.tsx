@@ -5,7 +5,6 @@ import { toast, Bounce } from 'react-toastify';
 export default function AuthRequired() {
     const { isAuthenticated } = useAuth();
     const location = useLocation();
-    console.log(isAuthenticated);
     if (!isAuthenticated) {
         if (location.pathname !== '/logout') {
             toast.info('Login required', {

@@ -11,14 +11,16 @@ import LoginPage from "./pages/authPages/LoginPage"
 import RegisterPage from "./pages/authPages/RegisterPage" 
 import VerifyEmailPage from "./pages/authPages/VerifyEmailPage" 
 import { AuthProvider } from './contexts/AuthContext';
-import Logout from "./components/Logout"
+import Logout from "./pages/authPages/LogoutPage"
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ForgotPasswordPage from "./pages/authPages/ForgotPasswordPage"
 
 
 function AppLayout() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const authPaths = ['/login', '/register', '/verify-email', '/forgot-password'];
+  const isAuthPage = authPaths.includes(location.pathname);
   
   return (
     <>
@@ -28,6 +30,7 @@ function AppLayout() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route element={<AuthRequired />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />

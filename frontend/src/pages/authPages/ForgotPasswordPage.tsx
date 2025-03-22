@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast, Bounce } from 'react-toastify';
 
-export default function VerifyEmail() {
-    const location = useLocation();
+export default function ForgotPasswordPage() {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
     const [timeLeft, setTimeLeft] = useState(0);
     const [buttonDisabled, setButtonDisabled] = useState(false);
+    const emailRef = useRef<HTMLButtonElement>(null);
+    const resendCodeRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         let timer: any;
@@ -21,10 +23,18 @@ export default function VerifyEmail() {
         return () => clearTimeout(timer);
     }, [timeLeft, buttonDisabled]);
 
-    async function resendOTP() {
+    async function resendLink() {
         try {
-            await axios.post("/api/auth/verify-email/", {email: location.state.email});
-            toast.success(`OTP was sent again`, {
+            if (emailRef.current && resendCodeRef.current) {
+                emailRef.current.disabled = true;
+                resendCodeRef.current.disabled = true;
+            }
+            await axios.post("/api/auth/forgotPassword/", {email});
+            if (emailRef.current && resendCodeRef.current) {
+                emailRef.current.disabled = false;
+                resendCodeRef.current.disabled = false;
+            }
+            toast.success(`Password reset link was sent again`, {
                 position: "top-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -44,24 +54,23 @@ export default function VerifyEmail() {
         }
     }
 
-    async function verifyOTP(formData: FormData) {
-        const emailOTP = formData.get("emailOTP");
+    async function sendLink(formData: any) {
+        const emailInput = formData.get("email");
+        setEmail(emailInput);
         try {
-            const response = await axios.post("/api/auth/verify-otp/", {
-                emailOTP, 
-                email: location.state.email,
-            });
-            const {verified, email} = response.data;
-            const {password, username} = location.state;
-            console.log(verified);
-            
-            if (verified) {
-                await axios.post("/api/auth/register", {
-                    email, 
-                    password, 
-                    username
-                });
-                toast.success(`${username}, registration was successful, please login`, {
+            if (emailRef.current && resendCodeRef.current) {
+                emailRef.current.disabled = true;
+                resendCodeRef.current.disabled = true;
+            }
+            const response = await axios.post("/api/auth/forgotPassword/", {email: emailInput});
+            const message = response.data.message;
+
+            if (emailRef.current && resendCodeRef.current) {
+                emailRef.current.disabled = false;
+                resendCodeRef.current.disabled = false;
+            }
+            if (message === "Invalid Email") {
+                toast.error(`Invalid Email, please try again`, {
                     position: "top-center",
                     autoClose: 5000,
                     hideProgressBar: false,
@@ -72,9 +81,9 @@ export default function VerifyEmail() {
                     theme: "colored",
                     transition: Bounce,
                 });
-                navigate("/login");
-            } else {
-                toast.error(`OTP is invalid or expired`, {
+                navigate("/forgot-password");
+            } else if (message === "Email sent") {
+                toast.success(`Reset link sent, please check you inbox`, {
                     position: "top-center",
                     autoClose: 5000,
                     hideProgressBar: false,
@@ -85,10 +94,19 @@ export default function VerifyEmail() {
                     theme: "colored",
                     transition: Bounce,
                 });
-                console.error("Email verification failed");
             }
         } catch (err) {
-            console.error(err);
+            toast.error(`Internal server error, please try again in a few minutes`, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+            });
         }
     }
 
@@ -102,13 +120,13 @@ export default function VerifyEmail() {
     return (
         <div className="container mx-auto mt-30 md:mt-50 px-4 py-8">
             <div className="flex flex-col justify-center items-center border-4 w-full sm:w-5/6 md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto p-4 sm:p-6 md:p-8 lg:p-12">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 w-full">Verify Your Email</h1>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 w-full">Forgot password?</h1>
                 
                 <p className="text-center mb-6">
-                    We've sent a verification code to your email. Please enter it below.
+                    Please enter the email address you'd like its password reset.
                 </p>
                 
-                <form action={verifyOTP} className="flex flex-col justify-center items-center gap-4 w-full">
+                <form action={sendLink} className="flex flex-col justify-center items-center gap-4 w-full">
                     <div className="w-full" style={{ maxWidth: "100%" }}>
                         <label className="input validator w-full">
                             <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -118,14 +136,14 @@ export default function VerifyEmail() {
                                 </g>
                             </svg>
                             <input 
-                                type="number" 
-                                name="emailOTP" 
-                                id="emailOTP" 
-                                placeholder="Enter verification code" 
+                                type="email" 
+                                name="email" 
+                                id="email" 
+                                placeholder="mail@site.com" 
                                 required 
                                 className="w-full"
-                                autoFocus
-                                aria-label="Email verification code"
+                                aria-required="true"
+                                aria-describedby="email-hint"
                             />
                         </label>
                     </div>
@@ -133,7 +151,8 @@ export default function VerifyEmail() {
                     <button 
                         type="submit" 
                         className="btn btn-primary w-full mt-4"
-                        aria-label="Verify email with entered code"
+                        aria-label="Submit form to send password reset email"
+                        ref={emailRef}
                     >
                         Verify Email
                     </button>
@@ -141,11 +160,12 @@ export default function VerifyEmail() {
                 
                 <div className="mt-6 w-full">
                     <button 
-                        onClick={resendOTP} 
+                        onClick={resendLink} 
                         disabled={buttonDisabled}
                         className={`w-full btn ${buttonDisabled ? 'btn-disabled' : 'btn-outline'}`}
-                        aria-label={buttonDisabled ? `Resend verification code, available in ${formatTime(timeLeft)}` : "Resend verification code"}
+                        aria-label={buttonDisabled ? `Resend password reset Link, available in ${formatTime(timeLeft)}` : "Resend password reset Link"}
                         aria-disabled={buttonDisabled}
+                        ref={resendCodeRef}
                     >
                         {buttonDisabled 
                             ? `Resend Code (${formatTime(timeLeft)})` 
@@ -156,6 +176,9 @@ export default function VerifyEmail() {
                 
                 <p className="text-sm mt-6 text-center">
                     Having trouble? Please check your spam folder or <Link to="/support" className="text-primary"> Contact support</Link>
+                </p>
+                <p className="text-sm mt-6 text-center">
+                    <Link to="/login" className="btn btn-block text-primary">&larr; back to login </Link>
                 </p>
             </div>
         </div>
