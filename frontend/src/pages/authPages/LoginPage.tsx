@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../contexts/AuthContext';
+import { toast, Bounce } from 'react-toastify';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -14,6 +15,17 @@ export default function LoginPage() {
       await login({ email, password });
       navigate("/dashboard");
     } catch (err) {
+      toast.info('Login failed! Please try again', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+        });
       console.error(err);
     }
     console.log("Login attempt:", { email, password });
@@ -38,6 +50,7 @@ export default function LoginPage() {
                 placeholder="mail@site.com" 
                 required 
                 className="w-full"
+                autoFocus
               />
             </label>
             <div className="validator-hint hidden">Enter valid email address</div>

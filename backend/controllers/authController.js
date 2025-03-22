@@ -4,6 +4,7 @@ import jwtTokens from "../utils/jwt-helpers.js"
 import createPasswordResetToken from "../utils/createPasswordResetToken.js"
 import sendEmail from "../utils/sendEmail.js"
 import crypto from "crypto";
+import randomstring from "randomstring"
 import jwt from "jsonwebtoken"
 
 export const login = async (req, res) => {
@@ -36,28 +37,73 @@ export const login = async (req, res) => {
 }
 
 export const register = async (req, res) => {
-    try {
-        // First check if user already exists
-        const existingUsers = await sql`
-            SELECT * FROM users
-            WHERE email = ${req.body.email}`;
-            
-        if (existingUsers.length > 0) {
-            return res.status(409).json({
-                message: "User already exists with this email or username"
-            });
-        }
-        
+    try {        
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUsers = await sql`
+        const newUser = await sql`
             INSERT INTO users (username, email, password)
-            VALUES (${req.body.username}, ${req.body.email}, ${hashedPassword})
-            RETURNING user_id, username, email`;
+            VALUES (${req.body.username}, ${req.body.email}, ${hashedPassword})`;
        
-        res.status(201).json(newUsers[0]);
+        res.status(201).json(newUser[0]);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const verifyEmail = async (req, res) => {
+    try {
+        // First check if user already exists
+        const user = await sql`
+            SELECT * FROM users
+            WHERE email = ${req.body.email}`;
+        if (user.length > 0) {
+            return res.json({ message: "duplicate" }); // DO NOT CHANGE MESSAGE TEXT
+
+        }
+
+        // Check if user has already requested an OTP, if so update the OTP, else create and send a new OTP
+        const userOTPVerification = await sql`
+            SELECT * FROM email_verification WHERE email = ${req.body.email}`;
+        const OTP = randomstring.generate({length: 6, charset: 'numeric'});
+        const time = new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
+        if (userOTPVerification.length > 0) {
+            await sql`UPDATE email_verification SET otp = ${OTP}, expires = ${time} WHERE email = ${req.body.email}`;
+        } else {
+            await sql`INSERT INTO email_verification (otp, expires, email) VALUES (${OTP}, ${time}, ${req.body.email})`;
+        }
+        await sendEmail({
+            email: req.body.email,
+            subject: "OTP for email verification",
+            message: `Your OTP is ${OTP} (valid for 10 minutes)`,
+        });
+        res.status(201).json({ message: "OTP sent to email" });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ message: "Error with verification" });
+    }
+}
+
+export const verifyOTP = async (req, res) => {
+    const {emailOTP, email, username} = req.body;
+    try {
+        const user = await sql`
+            SELECT * FROM email_verification
+            WHERE email = ${email} AND expires > NOW()`;
+        if (user.length === 0) {
+            return res.status(404).json({ verified: false });
+        }
+        if (user[0].otp === emailOTP) {
+            return res.status(200).json({ 
+                verified: true,
+                email,
+                username
+            });
+        } else {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
@@ -172,7 +218,7 @@ export const resetPassword = async (req, res, next) => {
         // encrypting the token from the user to compare with that of the database
         const resetToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
         const user = await sql`SELECT * FROM users WHERE password_reset_token = ${resetToken}`;
-        if (!user) {
+        if (user.length === 0) {
             return res.status(400).json({ message: "Invalid token or expired" });
         } else {
             // make sure pasword and confirm password are the same
@@ -181,8 +227,8 @@ export const resetPassword = async (req, res, next) => {
             await sql`
                 UPDATE users
                 SET password = ${hashedPassword},
-                password_reset_token = NULL,
-                password_reset_expires = NULL
+                password_reset_token = ${null},
+                password_reset_expires = ${null}
                 WHERE user_id = ${user[0].user_id}`;
             await sql `UPDATE users SET updated_at = ${time}, last_login = ${time} WHERE user_id = ${user[0].user_id}`
             let tokens = jwtTokens(user[0])
@@ -192,7 +238,7 @@ export const resetPassword = async (req, res, next) => {
                 sameSite: 'strict', // Helps prevent CSRF attacks
                 maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days in milliseconds (matching JWT expiry)
                 });
-            return res.status(200).json({ message: "Password reset successful", tokens });
+            return res.status(200).json({ message: "Password reset successful" });
         }
     } catch (error) {
         return res.status(400).json({ message: "Invalid token" });

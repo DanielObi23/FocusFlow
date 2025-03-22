@@ -1,11 +1,12 @@
-import { useLocation, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
+import { toast, Bounce } from 'react-toastify';
 import axios from "axios";
 
 export default function RegisterPage() {
-  const location = useLocation();
   const [passwordsMatch, setPasswordsMatch] = useState(true);
-  const navigate = useNavigate(); // Add this hook
+  const isLoading = useRef(false);
+  const navigate = useNavigate();
   
   async function handleRegister(formData: any): Promise<void> {
     const email = formData.get("email");
@@ -18,29 +19,40 @@ export default function RegisterPage() {
       setPasswordsMatch(false);
       return; // Prevent form submission
     }
-
     try {
-      const response = await axios.post("/api/auth/register", {
-        email,
-        password,
-        username,
-      });
-      
-      if (response.status === 201) {
-        console.log("User registered successfully");
-        navigate("/login", { state: { message: "Successfully Registered, Login" } });
-      } 
-    } catch (error: any) {
-      if (error.response && error.response.status === 409) {
-        console.log("User already exists");
-        navigate("/login", { state: { message: "Email already in use, please login" } });
+      isLoading.current = true;
+      const response = await axios.post("api/auth/verify-email", {email, password, username})
+      isLoading.current = false;
+      if (response.data.message === "duplicate") {
+        toast.error(`Email already in use, please try again or login`, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+        navigate("/register")
       } else {
-        console.error("Error registering user:", error);
-        alert("Error registering user");
+        toast.info("Please verify email", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+        navigate("/verify-email", { state: { email, password, username } });
       }
+    } catch (error: any) {
+      console.error("Error registering/verifying user:", error);
     }
-    
-    console.log("Registration attempt:", { email, password, confirmPassword, username });
   }
   
   // Function to check if passwords match on input change
@@ -58,13 +70,10 @@ export default function RegisterPage() {
   
   return (
     <div className="container mx-auto mt-30 md:mt-50 px-4 py-8">
-      {location.state?.message && (
-        <p className="base-300 text-xl md:text-2xl lg:text-3xl font-serif text-center mb-4">
-          {location.state.message}
-        </p>
-      )}
       <div className="flex flex-col justify-center items-center border-4 w-full sm:w-5/6 md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto p-4 sm:p-6 md:p-8 lg:p-12">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 w-full">Create Account</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 w-full">{isLoading.current && (
+          <span className="loading loading-bars loading-xl bg-accent me-3"></span>
+        )} Create Account</h1>
         
         <form action={handleRegister} className="flex flex-col justify-center items-center gap-4 w-full">
         <div className="w-full max-w-full">
@@ -81,6 +90,7 @@ export default function RegisterPage() {
                 placeholder="User Name" 
                 required 
                 className="w-full"
+                autoFocus
               />
             </label>
             <div className="validator-hint hidden">Please enter a username</div>
@@ -163,9 +173,9 @@ export default function RegisterPage() {
           <button 
             type="submit" 
             className="btn btn-primary w-full mt-6"
-            disabled={!passwordsMatch}
+            disabled={!passwordsMatch || isLoading.current}
           >
-            Create Account
+             {isLoading ? "Creating Account..." : "Create Account"}
           </button>
           
           <p className="text-sm mt-4">
