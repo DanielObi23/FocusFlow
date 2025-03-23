@@ -29,12 +29,12 @@ export default function ForgotPasswordPage() {
                 emailRef.current.disabled = true;
                 resendCodeRef.current.disabled = true;
             }
-            await axios.post("/api/auth/forgotPassword/", {email});
+            await axios.post("/api/auth/forgot-password/", {email});
             if (emailRef.current && resendCodeRef.current) {
                 emailRef.current.disabled = false;
                 resendCodeRef.current.disabled = false;
             }
-            toast.success(`Password reset link was sent again`, {
+            toast.success(`Password reset link was sent again, check spam folder also`, {
                 position: "top-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
                 emailRef.current.disabled = true;
                 resendCodeRef.current.disabled = true;
             }
-            const response = await axios.post("/api/auth/forgotPassword/", {email: emailInput});
+            const response = await axios.post("/api/auth/forgot-password/", {email: emailInput});
             const message = response.data.message;
 
             if (emailRef.current && resendCodeRef.current) {
@@ -150,7 +150,7 @@ export default function ForgotPasswordPage() {
                     
                     <button 
                         type="submit" 
-                        className="btn btn-primary w-full mt-4"
+                        className="btn btn-primary w-full mt-4 font-bold"
                         aria-label="Submit form to send password reset email"
                         ref={emailRef}
                     >
@@ -162,14 +162,14 @@ export default function ForgotPasswordPage() {
                     <button 
                         onClick={resendLink} 
                         disabled={buttonDisabled}
-                        className={`w-full btn ${buttonDisabled ? 'btn-disabled' : 'btn-outline'}`}
+                        className={`w-full btn font-bold ${buttonDisabled ? 'btn-disabled' : 'btn-outline'}`}
                         aria-label={buttonDisabled ? `Resend password reset Link, available in ${formatTime(timeLeft)}` : "Resend password reset Link"}
                         aria-disabled={buttonDisabled}
                         ref={resendCodeRef}
                     >
                         {buttonDisabled 
-                            ? `Resend Code (${formatTime(timeLeft)})` 
-                            : "Resend Code"
+                            ? `Resend Link (${formatTime(timeLeft)})` 
+                            : "Resend Link"
                         }
                     </button>
                 </div>

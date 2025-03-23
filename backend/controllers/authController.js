@@ -44,7 +44,7 @@ export const register = async (req, res) => {
             VALUES (${req.body.username}, ${req.body.email}, ${hashedPassword})`;
         await sql`
             DELETE FROM email_verification WHERE email = ${req.body.email}`
-        res.status(201);
+        res.status(201).json({ message: "Registration successful" });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal Server Error" });
@@ -74,9 +74,78 @@ export const verifyEmail = async (req, res) => {
         }
         await sendEmail({
             email: req.body.email,
-            subject: "OTP for email verification",
-            message: `Your OTP is ${OTP} (valid for 10 minutes)`,
-        });
+            subject: "Your FocusFlow Verification Code",
+            text: `Your verification code is ${OTP}. This code will expire in 10 minutes.
+          
+            Thank you for using FocusFlow.`,
+                html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Verify Your Email</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333333;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .header {
+                        text-align: center;
+                        padding: 10px 0;
+                    }
+                    .content {
+                        background-color: #f9f9f9;
+                        padding: 30px;
+                        border-radius: 5px;
+                    }
+                    .verification-code {
+                        font-size: 28px;
+                        font-weight: bold;
+                        text-align: center;
+                        letter-spacing: 5px;
+                        margin: 30px 0;
+                        color: #4F46E5;
+                    }
+                    .footer {
+                        text-align: center;
+                        font-size: 12px;
+                        color: #888888;
+                        margin-top: 30px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                <div class="header">
+                    <h2 style="font-size: 3rem" >FocusFlow</h2>
+                </div>
+                <div class="content">
+                    <h2>Verify Your Email</h2>
+                    <p>Thanks for signing up for FocusFlow! Please use the verification code below to complete your registration:</p>
+                    
+                    <div class="verification-code">${OTP}</div>
+                    
+                    <p>This code will expire in <strong>10 minutes</strong>.</p>
+                    <p>If you didn't request this code, you can safely ignore this email.</p>
+                </div>
+                <div class="footer">
+                    <p>© ${new Date().getFullYear()} FocusFlow. All rights reserved.</p>
+                    <p>This is an automated message, please do not reply to this email.</p>
+                </div>
+                </div>
+            </body>
+            </html>
+            `
+          });
         res.status(201).json({ message: "OTP sent to email" });
     } catch (error) {
         console.error(error);
@@ -85,7 +154,7 @@ export const verifyEmail = async (req, res) => {
 }
 
 export const verifyOTP = async (req, res) => {
-    const {emailOTP, email, username} = req.body;
+    const {emailOTP, email} = req.body;
     try {
         const user = await sql`
             SELECT * FROM email_verification
@@ -96,8 +165,7 @@ export const verifyOTP = async (req, res) => {
         if (user[0].otp === emailOTP) {
             return res.status(200).json({ 
                 verified: true,
-                email,
-                username
+                email
             });
         } else {
             return res.status(400).json({ message: "Invalid OTP" });
@@ -179,16 +247,103 @@ export const forgotPassword = async (req, res, next) => {
             password_reset_expires = ${passwordResetExpires}
             WHERE user_id = ${user[0].user_id}`;
         // sending the plain password reset token to user and saving the encrypted token in database
-        const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
-        const message = `Forgot your password? reset password by going to: ${resetUrl}
-        \nIf you didn't request password change, please ignore this email!
-        \nLink valid only for 10 minutes.
-        \nOr Create account (account creation link) or login (login link)`;
+        const resetUrl = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
         try {
             await sendEmail({
-                email: user[0].email,
-                subject: "Your password reset token (valid for 10 minutes)",
-                message,
+              email: user[0].email,
+              subject: "Reset Your FocusFlow Password",
+              text: `Reset your FocusFlow password by clicking: ${resetUrl}
+              
+            This link will expire in 10 minutes.
+            
+            If you didn't request a password reset, please ignore this email.
+            
+            Need help? Reply to this email for support.`,
+                html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Reset Your Password</title>
+                <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333333;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .header {
+                    text-align: center;
+                    padding: 20px 0;
+                }
+                .content {
+                    background-color: #f9f9f9;
+                    padding: 30px;
+                    border-radius: 5px;
+                }
+                .button {
+                    display: inline-block;
+                    background-color: #4F46E5;
+                    color: white !important;
+                    text-decoration: none;
+                    padding: 12px 24px;
+                    border-radius: 4px;
+                    margin: 20px 0;
+                    font-weight: bold;
+                }
+                .footer {
+                    text-align: center;
+                    font-size: 12px;
+                    color: #888888;
+                    margin-top: 30px;
+                }
+                .links {
+                    margin-top: 20px;
+                }
+                .links a {
+                    color: #4F46E5;
+                    margin: 0 10px;
+                }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                <div class="header">
+                    <h2 style="font-size: 3rem">FocusFlow</h2>
+                </div>
+                <div class="content">
+                    <h2>Reset Your Password</h2>
+                    <p>We received a request to reset your password. Click the button below to create a new password:</p>
+                    
+                    <div style="text-align: center;">
+                    <a href="${resetUrl}" class="button">Reset Password</a>
+                    </div>
+                    
+                    <p>This link will expire in <strong>10 minutes</strong>.</p>
+                    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                    <p style="word-break: break-all;"><a href="${resetUrl}">${resetUrl}</a></p>
+                    <p>If you didn't request a password reset, you can safely ignore this email.</p>
+                    
+                    <div class="links">
+                    <a href="${req.protocol}://localhost:5173/login">Log In</a> | 
+                    <a href="${req.protocol}://localhost:5173/register">Create Account</a>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>© ${new Date().getFullYear()} FocusFlow. All rights reserved.</p>
+                    <p>This is an automated message from FocusFlow.</p>
+                </div>
+                </div>
+            </body>
+            </html>
+                `
             });
             return res.status(200).json({message: "Email sent" });
         } catch (error) {
@@ -211,12 +366,14 @@ export const forgotPassword = async (req, res, next) => {
 export const resetPassword = async (req, res, next) => {
     try {
         // encrypting the token from the user to compare with that of the database
-        const resetToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        const resetToken = crypto.createHash('sha256').update(req.body.token).digest('hex');
         const user = await sql`SELECT * FROM users WHERE password_reset_token = ${resetToken}`;
+        if (user.length > 0 && !req.body.password) {
+            return res.status(200).json({ message: "Token is valid" });
+        }
         if (user.length === 0) {
             return res.status(400).json({ message: "Invalid token or expired" });
         } else {
-            // make sure pasword and confirm password are the same
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
             let time = new Date(Date.now()).toISOString()
             await sql`
@@ -233,9 +390,9 @@ export const resetPassword = async (req, res, next) => {
                 sameSite: 'strict', // Helps prevent CSRF attacks
                 maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days in milliseconds (matching JWT expiry)
                 });
-            return res.status(200).json({ message: "Password reset successful" });
+            return res.status(200).json({ message: "success" });
         }
     } catch (error) {
-        return res.status(400).json({ message: "Invalid token" });
+        return res.status(400).json({ message: "server error" });
     }
 }

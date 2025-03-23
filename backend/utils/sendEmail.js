@@ -1,21 +1,28 @@
-import nodemailer from 'nodemailer';
+import sgMail from'@sendgrid/mail';
+import dotenv from "dotenv";
 
+dotenv.config();
 export default async function sendEmail(option) {
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
-
-    const emailOptions = {
-        from: 'FocusFlow support<support@focusflow.com',
-        to: option.email,
-        subject: option.subject,
-        text: option.message,
-    }
-
-    await transporter.sendMail(emailOptions);
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
+    to: option.email,
+    from: {
+        name: "FocusFlow",
+        email: process.env.SENDGRID_EMAIL,
+    },
+    subject: option.subject,
+    text: option.text,
+    html: option.html,
+    };
+    try {
+        await sgMail.send(msg);
+      } catch (error) {
+        console.error(error);
+    
+        if (error.response) {
+          console.error(error.response.body)
+        }
+      }
 }
+
+

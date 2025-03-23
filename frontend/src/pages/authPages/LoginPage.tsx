@@ -28,7 +28,6 @@ export default function LoginPage() {
         });
       console.error(err);
     }
-    console.log("Login attempt:", { email, password });
   }
   return (
     <div className="container mx-auto mt-30 md:mt-50 px-4 py-8">
@@ -83,7 +82,7 @@ export default function LoginPage() {
             </p>
           </div>
           <Link to="/forgot-password" className="text-primary my-0">Forgot password? </Link>
-          <button type="submit" className="btn btn-primary w-full mt-4">
+          <button type="submit" className="btn btn-primary w-full mt-4 font-bold">
             Log In
           </button>
           <p className="text-sm mt-4">

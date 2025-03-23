@@ -1,26 +1,27 @@
 import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom"
 import Header from "./components/Header"
 import DashboardPage from "./pages/appPages/DashboardPage"
+import { AuthProvider } from './contexts/AuthContext';
 import LearningPathsPage from "./pages/appPages/LearningPathsPage"
 import NotFoundPage from "./pages/errorPages/NotFoundPage"
 import ProfilePage from "./pages/appPages/ProfilePage"
 import SkillsPage from "./pages/appPages/SkillsPage"
 import ContactSupportPage from "./pages/errorPages/ContactSupportPage"
 import AuthRequired from "./components/AuthRequired"
-import LoginPage from "./pages/authPages/LoginPage"
 import RegisterPage from "./pages/authPages/RegisterPage" 
 import VerifyEmailPage from "./pages/authPages/VerifyEmailPage" 
-import { AuthProvider } from './contexts/AuthContext';
+import LoginPage from "./pages/authPages/LoginPage"
+import ForgotPasswordPage from "./pages/authPages/ForgotPasswordPage"
+import PasswordResetPage from "./pages/authPages/PasswordResetPage"
 import Logout from "./pages/authPages/LogoutPage"
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ForgotPasswordPage from "./pages/authPages/ForgotPasswordPage"
 
 
 function AppLayout() {
   const location = useLocation();
-  const authPaths = ['/login', '/register', '/verify-email', '/forgot-password'];
-  const isAuthPage = authPaths.includes(location.pathname);
+  const authPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
+  const isAuthPage = authPaths.some(path => location.pathname.startsWith(path));
   
   return (
     <>
@@ -31,6 +32,7 @@ function AppLayout() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<PasswordResetPage />} />
         <Route element={<AuthRequired />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />

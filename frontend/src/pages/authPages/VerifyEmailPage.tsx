@@ -53,7 +53,6 @@ export default function VerifyEmail() {
             });
             const {verified, email} = response.data;
             const {password, username} = location.state;
-            console.log(verified);
             
             if (verified) {
                 await axios.post("/api/auth/register", {
@@ -88,6 +87,17 @@ export default function VerifyEmail() {
                 console.error("Email verification failed");
             }
         } catch (err) {
+            toast.error(`Server error, please try again later`, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+            });
             console.error(err);
         }
     }
@@ -105,7 +115,7 @@ export default function VerifyEmail() {
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 w-full">Verify Your Email</h1>
                 
                 <p className="text-center mb-6">
-                    We've sent a verification code to your email. Please enter it below.
+                    We've sent a verification code to your email ({location.state.email}). Please enter it below.
                 </p>
                 
                 <form action={verifyOTP} className="flex flex-col justify-center items-center gap-4 w-full">
@@ -143,7 +153,7 @@ export default function VerifyEmail() {
                     <button 
                         onClick={resendOTP} 
                         disabled={buttonDisabled}
-                        className={`w-full btn ${buttonDisabled ? 'btn-disabled' : 'btn-outline'}`}
+                        className={`w-full btn font-bold ${buttonDisabled ? 'btn-disabled' : 'btn-outline'}`}
                         aria-label={buttonDisabled ? `Resend verification code, available in ${formatTime(timeLeft)}` : "Resend verification code"}
                         aria-disabled={buttonDisabled}
                     >

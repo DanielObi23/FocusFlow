@@ -1,13 +1,14 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { toast, Bounce } from 'react-toastify';
 import axios from "axios";
 
-export default function RegisterPage() {
+export default function PasswordResetPage() {
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const { token } = useParams();
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null);
-  const createAccountRef = useRef<HTMLButtonElement>(null);
+  const resetPasswordRef = useRef<HTMLButtonElement>(null);
   const loadingRef = useRef<HTMLElement>(null);
 
   // Screen reader announcement for form errors
@@ -22,12 +23,55 @@ export default function RegisterPage() {
       return () => clearTimeout(timer);
     }
   }, [errorMessage]);
+  // checking if token is valid, if not sending the user back to forgot password page
+    async function verifyToken() {
+        console.log("about to verify token")
+        try {
+            console.log(token)
+            const response = await axios.patch(`/api/auth/reset-password`, { token });
+            console.log(response.data)
+            const message = response.data.message
+            console.log(message);
+            if (message === "Token is valid") {
+                console.log("verified")
+                return;
+            } else {
+                toast.error(`Link has expired, request new link`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    transition: Bounce,
+                });
+                navigate("/forgotPassword")
+            }
+        } catch (error) {
+            toast.error(`Server Error, please request new link`, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+            });
+            navigate("/forgotPassword")
+        }
+    }
 
-  async function handleRegister(formData: FormData): Promise<void> {
-    const email = formData.get("email") as string;
+    useEffect(() => {
+        verifyToken();
+    }, []);
+
+  async function handleReset(formData: FormData): Promise<void> {
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
-    const username = formData.get("username") as string;
     
     // Check if passwords match before proceeding
     if (password !== confirmPassword) {
@@ -40,21 +84,19 @@ export default function RegisterPage() {
     }
     
     try {
-      if (createAccountRef.current) {
-        createAccountRef.current.disabled = true;
+      if (resetPasswordRef.current) {
+        resetPasswordRef.current.disabled = true;
         loadingRef.current?.classList.remove("hidden");
       }
+      const response = await axios.patch(`/api/auth/reset-password`, { token, password });
 
-      const response = await axios.post("api/auth/verify-email", {email, password, username})
-
-      if (createAccountRef.current) {
-        createAccountRef.current.disabled = false;
+      if (resetPasswordRef.current) {
+        resetPasswordRef.current.disabled = false;
         loadingRef.current?.classList.add("hidden");
       }
 
-      if (response.data.message === "duplicate") {
-        setErrorMessage("Email already in use, please try again or login");
-        toast.error(`Email already in use, please try again or login`, {
+      if (response.data.message === "success") {
+        toast.success(`Password reset was succesful`, {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
@@ -65,9 +107,9 @@ export default function RegisterPage() {
           theme: "colored",
           transition: Bounce,
         });
-        navigate("/register")
+        navigate("/login")
       } else {
-        toast.info("Please verify email", {
+        toast.error("Server error, please request new link or try again later", {
           position: "top-center",
           autoClose: 5000,
           hideProgressBar: false,
@@ -78,7 +120,7 @@ export default function RegisterPage() {
           theme: "colored",
           transition: Bounce,
         });
-        navigate("/verify-email", { state: { email, password, username } });
+        navigate("/login")
       }
     } catch (error) {
       console.error("Error registering/verifying user:", error);
@@ -116,7 +158,7 @@ export default function RegisterPage() {
             role="status"
             ref={loadingRef}
           ></span>
-          Create Account
+          Reset Password
         </h1>
         
         {/* Accessibility: Live region for announcing errors */}
@@ -131,60 +173,13 @@ export default function RegisterPage() {
         
         <form 
           ref={formRef}
-          action={handleRegister} 
+          action={handleReset} 
           className="flex flex-col justify-center items-center gap-4 w-full"
           aria-labelledby="registration-heading"
           noValidate
         >
-          <div id="registration-heading" className="sr-only">Account Registration Form</div>
-          
-          <div className="w-full max-w-full">
-            <label htmlFor="username" className="block mb-1 text-sm font-medium">Username</label>
-            <label className="input validator w-full">
-              <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </g>
-              </svg>
-              <input 
-                type="text" 
-                name="username" 
-                id="username"
-                placeholder="User Name" 
-                required 
-                className="w-full"
-                autoFocus
-                aria-required="true"
-                aria-describedby="username-hint"
-              />
-            </label>
-            <div id="username-hint" className="validator-hint hidden">Please enter a username</div>
-          </div>
-          
-          <div className="w-full max-w-full">
-            <label htmlFor="email" className="block mb-1 text-sm font-medium">Email Address</label>
-            <label className="input validator w-full">
-              <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
-                  <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                </g>
-              </svg>
-              <input 
-                type="email" 
-                name="email" 
-                id="email" 
-                placeholder="mail@site.com" 
-                required 
-                className="w-full"
-                aria-required="true"
-                aria-describedby="email-hint"
-              />
-            </label>
-            <div id="email-hint" className="validator-hint hidden">Enter valid email address</div>
-          </div>
-          
+          <div id="registration-heading" className="sr-only">Password Reset Form</div>
+
           <div className="w-full max-w-full">
             <label htmlFor="password" className="block mb-1 text-sm font-medium">Password</label>
             <label className="input validator w-full">
@@ -248,34 +243,18 @@ export default function RegisterPage() {
             </div>
           </div>
           
-          <div className="w-full flex items-center gap-2 mt-2">
-            <input 
-              type="checkbox" 
-              name="terms" 
-              id="terms" 
-              required 
-              className="checkbox" 
-              aria-required="true"
-              aria-describedby="terms-description"
-            />
-            <label htmlFor="terms" className="text-sm">
-              I agree to the <Link to="/register" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/register" className="text-primary hover:underline">Privacy Policy</Link>
-            </label>
-            <div id="terms-description" className="sr-only">You must accept the terms and privacy policy to create an account</div>
-          </div>
-          
           <button 
             type="submit" 
             className="btn btn-primary w-full mt-6 font-bold"
             disabled={!passwordsMatch}
             aria-disabled={!passwordsMatch}
-            ref={createAccountRef}
+            ref={resetPasswordRef}
           >
-            Create Account
+            Reset Password
           </button>
           
           <p className="text-sm mt-4">
-            Already have an account? <Link to="/login" className="text-primary hover:underline">Log in</Link>
+            Remembered password? <Link to="/login" className="text-primary hover:underline">Log in</Link>
           </p>
         </form>
       </div>

@@ -24,6 +24,7 @@ export default function ProfilePage() {
         fetchData()
     }, [])
 
+    //TODO: after account deletion, be sure to log user out, also add are you sure modal before deleting, they must type delete focusflow
     return (
         <>
         <h1>Profile Page</h1>

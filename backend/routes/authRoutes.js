@@ -16,9 +16,9 @@ router.post("/logout", logout)
 
 router.post("/token", refreshToken);
 
-router.post("/forgotPassword", forgotPassword);
+router.post("/forgot-password", forgotPassword);
 
-router.patch("/resetPassword/:token", resetPassword);
+router.patch("/reset-password", resetPassword);
 
 router.get("/validate-token", authenticateToken, validateToken);
 
