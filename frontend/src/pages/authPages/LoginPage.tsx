@@ -13,9 +13,10 @@ export default function LoginPage() {
     
     try {
       await login({ email, password });
-      navigate("/dashboard");
+      localStorage.setItem("email", email);
+      navigate("/dashboard", {state: {email}});
     } catch (err) {
-      toast.info('Login failed! Please try again', {
+      toast.error('Login failed! Please try again', {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,

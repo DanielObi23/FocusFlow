@@ -2,10 +2,11 @@ import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom"
 import Header from "./components/Header"
 import DashboardPage from "./pages/appPages/DashboardPage"
 import { AuthProvider } from './contexts/AuthContext';
-import LearningPathsPage from "./pages/appPages/LearningPathsPage"
+import LearningPathsPage from "./pages/appPages/PathsLibraryPage"
 import NotFoundPage from "./pages/errorPages/NotFoundPage"
-import ProfilePage from "./pages/appPages/ProfilePage"
-import SkillsPage from "./pages/appPages/SkillsPage"
+import ProfilePage from "./pages/appPages/profilePages/ProfilePage"
+import SkillsPage from "./pages/appPages/profilePages/SkillsPage"
+import AchievementPage from "./pages/appPages/profilePages/AchievementPage"
 import ContactSupportPage from "./pages/errorPages/ContactSupportPage"
 import AuthRequired from "./components/AuthRequired"
 import RegisterPage from "./pages/authPages/RegisterPage" 
@@ -33,13 +34,14 @@ function AppLayout() {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<PasswordResetPage />} />
+        <Route path="/support" element={<ContactSupportPage />} />
         <Route element={<AuthRequired />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/paths" element={<LearningPathsPage />} />
           <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/achievements" element={<AchievementPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/support" element={<ContactSupportPage />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

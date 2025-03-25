@@ -70,9 +70,9 @@ export default function ThemeController() {
 
   document.getElementsByTagName("html")[0].setAttribute("data-theme", theme);
   return (
-    <div className="dropdown mb-72">
+    <div className="dropdown mb-72 mt-3">
       <div tabIndex={0} role="button" className="btn m-1 rounded-4xl">
-        <FaPalette className="text-base-content opacity-70 mr-2" /> Theme  
+        <FaPalette className="text-base-content opacity-70 mr-2 text-xl" /> Theme  
         <svg
           width="12px"
           height="12px"

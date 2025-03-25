@@ -184,8 +184,6 @@ export const refreshToken = async (req, res) => {
         return res.status(401).json({ error: "No refresh token" });
       }
      
-      // Make sure to import jwt at the top of your file
-      // import jwt from 'jsonwebtoken';
       jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (error, user) => {
         if (error) {
           return res.status(403).json({ error: error.message });

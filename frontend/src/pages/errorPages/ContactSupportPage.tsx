@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 export default function ContactSupportPage() {
     return (
         <>
@@ -94,6 +95,9 @@ export default function ContactSupportPage() {
                             Let's talk
                         </button>
                     </div>
+                <p className="text-sm mt-6 text-center max-w-3/5 justify-self-center">
+                    <Link to="/profile" className="btn btn-block text-primary">&larr; back to profile </Link>
+                </p>
                 </form>
             </div>
         </>
