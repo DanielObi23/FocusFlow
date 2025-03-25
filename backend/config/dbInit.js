@@ -27,6 +27,18 @@ const initDB = async () => {
                 otp VARCHAR(255) NOT NULL,
                 expires TIMESTAMP NOT NULL
             )`;
+            
+        await sql`
+            CREATE TABLE IF NOT EXISTS work_experience (
+                experience_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id uuid REFERENCES users(user_id) ON DELETE CASCADE,
+                title VARCHAR(255) NOT NULL,
+                company VARCHAR(255) NOT NULL,
+                experience_category VARCHAR(50) NOT NULL,
+                start_date VARCHAR(10) NOT NULL,
+                end_date VARCHAR(10),
+                description TEXT
+            )`;
 
         await sql`
             CREATE TABLE IF NOT EXISTS skills (

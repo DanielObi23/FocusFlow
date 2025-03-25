@@ -14,7 +14,7 @@ export const login = async (req, res) => {
             SELECT * FROM users
             WHERE email = ${email}`;
         if (user.length === 0) {
-            return res.status(401).json({ message: "Email is invalid" });
+            return res.status(400).json({ message: "Email is invalid" });
         }
         const validPasword = await bcrypt.compare(password, user[0].password); //password check
         if (!validPasword) {
@@ -160,7 +160,7 @@ export const verifyOTP = async (req, res) => {
             SELECT * FROM email_verification
             WHERE email = ${email} AND expires > NOW()`;
         if (user.length === 0) {
-            return res.json({ verified: false });
+            return res.status(204).json({ verified: false });
         }
         if (user[0].otp === emailOTP) {
             return res.status(200).json({ 
@@ -178,24 +178,20 @@ export const verifyOTP = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
     try {
-      const refreshToken = req.cookies.refreshToken;
-     
-      if (!refreshToken) {
-        return res.status(401).json({ error: "No refresh token" });
-      }
-     
-      jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (error, user) => {
-        if (error) {
-          return res.status(403).json({ error: error.message });
-        }
-       
-        // Create new access token
-        const tokens = jwtTokens(user);
-       
-        res.json({ accessToken: tokens.accessToken });
-      });
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) return res.status(401).json({ error: "No refresh token" });
+
+        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (error, user) => {
+            if (error) {
+                if (error.name === 'TokenExpiredError') return res.status(403).json({ error: "Refresh token expired" });
+                return res.status(403).json({ error: "Invalid refresh token" });
+            }
+            const tokens = jwtTokens(user);
+            res.json({ accessToken: tokens.accessToken });
+        });
     } catch (error) {
-      res.status(401).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong" });
     }
 };
 
@@ -370,7 +366,7 @@ export const resetPassword = async (req, res, next) => {
             return res.status(200).json({ message: "Token is valid" });
         }
         if (user.length === 0) {
-            return res.status(400).json({ message: "Invalid token or expired" });
+            return res.status(204).json({ message: "Invalid token or expired" });
         } else {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
             let time = new Date(Date.now()).toISOString()
