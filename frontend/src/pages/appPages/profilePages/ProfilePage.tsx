@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense} from "react"
 import axios from "axios"
-import AppSideBar from "../../../components/AppSideBar";
+import AppSideBar from "../../../components/ProfileSideBar";
 import { FaInfo } from "react-icons/fa";
 import { toast, Bounce } from 'react-toastify';
-import avatar from "../../../assets/avatar.avif";
 import WorkExperience from "../../../components/WorkExperience";
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
+import TruckLoader from "../../../components/TruckLoader"
 
 interface UserProfile {
     username: string,
@@ -42,11 +44,13 @@ export default function ProfilePage() {
 
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [value, setValue] = useState<string | undefined>()
 
     useEffect(() => {
         async function getUserData() {
             if (email) {
                 try {
+                    console.log("get user data")
                     const response = await axios.post("/api/profile/userData", { email });
                     setUserProfile(response.data.profile);
                     setWorkExperience(response.data.work_experience);
@@ -74,20 +78,41 @@ export default function ProfilePage() {
             const image = formData.get("image")
             const firstName = formData.get("first_name")
             const lastName = formData.get("last_name")
-            const phoneNumber = formData.get("number")
-    
-            const urlResponse = await axios.get("/api/profile/profileUrl")
-            const uploadUrl = urlResponse.data.profile_image_url;
-    
-            if (image instanceof File) {
-                await axios.put(uploadUrl, image, {
-                    headers: {
-                        'Content-Type': image.type
+            let phoneNumber = formData.get("number")
+            
+            console.log(image)
+            if (image instanceof File && image.name.length > 0) {
+                const urlResponse = await axios.get("/api/profile/profileUrl")
+                const uploadUrl = urlResponse.data.profile_image_url;
+        
+                if (image instanceof File) {
+                    await axios.put(uploadUrl, image, {
+                        headers: {
+                            'Content-Type': image.type
+                        }
+                    });
+        
+                    const imageUrl = uploadUrl.split('?')[0];
+                    if (!phoneNumber || (typeof phoneNumber === 'string' && phoneNumber.length === 0)) {
+                        phoneNumber = userProfile.phone_number;
                     }
-                });
-    
-                const imageUrl = uploadUrl.split('?')[0];
-    
+                    const response = await axios.patch("/api/profile/updateProfile", {
+                        imageUrl, 
+                        firstName, 
+                        lastName, 
+                        phoneNumber, 
+                        email
+                    });
+        
+                    setUserProfile(response.data);
+                    // reloading so the header component photo changes as well
+                    window.location.reload()
+                }
+            } else if (image instanceof File && image.name.length === 0) {
+                const imageUrl = userProfile.profile_image_url
+                if (!phoneNumber || (typeof phoneNumber === 'string' && phoneNumber.length === 0)) {
+                    phoneNumber = userProfile.phone_number;
+                }
                 const response = await axios.patch("/api/profile/updateProfile", {
                     imageUrl, 
                     firstName, 
@@ -97,7 +122,6 @@ export default function ProfilePage() {
                 });
     
                 setUserProfile(response.data);
-                window.location.reload()
             }
         } catch (err) {
             toast.error(`Error updating info, please try again later`, {
@@ -256,31 +280,37 @@ export default function ProfilePage() {
     });
 
     return (
+        <Suspense fallback={<TruckLoader />}>
         <AppSideBar>
-            <div className="flex items-center justify-center flex-col gap-5">
-                <div className="flex justify-between items-center border-2 p-7 w-2/3 mt-5 flex-col gap-4">
+            <div className="flex items-center justify-center flex-col gap-5 w-full p-4 md:p-7 xl:py-8 xl:px-10">
+                <div className="flex justify-between items-center border-2 px-5 py-7 mt-5 flex-col gap-4 w-full">
                     <div className="flex justify-between w-full">
-                        <div className="flex">
-                            <div className="avatar flex flex-col">
-                                <div className="w-24 rounded-full">
-                                    <img 
-                                        src={userProfile.profile_image_url && userProfile.profile_image_url.length > 0 ? userProfile.profile_image_url : avatar} 
-                                        alt="Profile" 
-                                    />
+                        <div className="flex flex-col w-full">
+                            <div className="flex justify-between w-full">
+                                <div className="flex">
+                                    <div className="avatar flex flex-col">
+                                        <div className="w-24 rounded-full">
+                                            {userProfile.profile_image_url && userProfile.profile_image_url.length > 0 ? <img 
+                                                src={userProfile.profile_image_url} 
+                                                alt="Profile" 
+                                            /> : <div className="skeleton object-cover rounded-full"></div>}
+                                        </div>
+                                    </div>
+                                    <div className="ml-4 self-center">
+                                        <h1 className="font-bold text-start text-primary text-xl capitalize">{userProfile.username}</h1>
+                                        <p className="hidden md:block">Member since {new Date(userProfile.created_at).toDateString()}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="ml-4 self-center">
-                                <h1 className="font-bold text-start text-primary text-lg capitalize">{userProfile.username}</h1>
-                                <p>Member since {new Date(userProfile.created_at).toDateString()}</p>
-                            </div>
-                        </div>
-                        <div className="flex justify-between">
-                            <button className="btn btn-primary font-semibold" onClick={() => {
+                                <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
                                 const modal = document.getElementById('profile-modal');
-                                if (modal) {
-                                    (modal as HTMLDialogElement).showModal();
-                                }
-                            }}>Edit Info</button>
+                                    if (modal) {
+                                        (modal as HTMLDialogElement).showModal();
+                                    }
+                                }}>Edit Info</button>
+                            </div>
+                            <p className="block mt-2 md:hidden">Member since {new Date(userProfile.created_at).toDateString()}</p>
+                        </div>
+                        <div className="flex justify-between mr-3">
                             <dialog id="profile-modal" className="modal">
                                 <div className="modal-box w-full">
                                     <form action={updateProfile} className="flex flex-col gap-4 w-full">
@@ -293,17 +323,21 @@ export default function ProfilePage() {
 
                                         <label className="input w-full">
                                             <span className="label"><span className="font-semibold text-lg">First name:</span></span>
-                                            <input type="text" name="first_name" placeholder="e.g John" defaultValue={userProfile.first_name || ""} />
+                                            <input type="text" name="first_name" placeholder="e.g John" defaultValue={userProfile.first_name || ""} maxLength={30}/>
                                         </label>
 
                                         <label className="input w-full">
                                             <span className="label"><span className="font-semibold text-lg">Last name:</span></span>
-                                            <input type="text" name="last_name" placeholder="e.g Smith" defaultValue={userProfile.last_name || ""}/>
+                                            <input type="text" name="last_name" placeholder="e.g Smith" defaultValue={userProfile.last_name || ""} maxLength={30}/>
                                         </label>
 
                                         <label className="input w-full">
-                                            <span className="label"><span className="font-semibold text-lg">Contact:</span></span>
-                                            <input type="tel" name="number" placeholder="+44 7800 000000" defaultValue={userProfile.phone_number || ""}/>
+                                            <PhoneInput
+                                                placeholder="Enter phone number"
+                                                className="w-full"
+                                                name="number"
+                                                value={value}
+                                                onChange={setValue}/>
                                         </label>
                                         <div className="w-full flex justify-between">
                                             <button type="button" className="btn" onClick={()=>{
@@ -324,32 +358,32 @@ export default function ProfilePage() {
                             </dialog>
                         </div>
                     </div>
-                    <div className="flex p-7 w-full justify-between font-semibold gap-3">
-                        <fieldset className="border-2 p-5 w-1/2">
+                    <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
+                        <fieldset className="border-2 p-5 sm:w-1/2 w-full">
                             <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;First name&nbsp;&nbsp;</legend>
                             <p className="text-accent italic capitalize">{userProfile.first_name || "Add your first name"}</p>
                         </fieldset>
-                        <fieldset className="border-2 p-5 w-1/2">
+                        <fieldset className="border-2 p-5 sm:w-1/2 w-full">
                             <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;Last name&nbsp;&nbsp;</legend>
                             <p className="text-accent italic capitalize">{userProfile.last_name || "Add your last name"}</p>
                         </fieldset>
                     </div>
-                    <div className="flex p-7 w-full justify-between font-semibold gap-3">
-                        <fieldset className="border-2 p-5 w-1/2">
-                            <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;Email&nbsp;&nbsp;</legend>
-                            <p className="text-accent italic">{userProfile.email}</p>
+                    <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
+                        <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
+                            <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Email&nbsp;&nbsp;</legend>
+                            <p className="text-accent italic text-base">{userProfile.email}</p>
                         </fieldset>
-                        <fieldset className="border-2 p-5 w-1/2">
-                            <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;Phone number&nbsp;&nbsp;</legend>
-                            <p className="text-accent italic">{userProfile.phone_number || "Add your contact number"}</p>
+                        <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
+                            <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Phone number&nbsp;&nbsp;</legend>
+                            <p className="text-accent italic text-base">{userProfile.phone_number || "Add your contact number"}</p>
                         </fieldset>
                     </div>
                 </div>
 
-                <fieldset className="border-2 p-7 w-2/3 flex flex-col gap-3">
-                    <legend className="font-bold text-2xl text-primary">&nbsp;&nbsp;Work experience&nbsp;&nbsp;</legend>
+                <fieldset className="border-2 flex gap-4 px-5 pb-7 pt-5 mt-5 flex-col w-full">
+                    <legend className="font-bold text-2xl lg:text-3xl text-primary">&nbsp;&nbsp;Work experience&nbsp;&nbsp;</legend>
                     <div className="flex self-end">
-                        <button className="btn btn-primary font-semibold" onClick={() => {
+                        <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
                             const modal = document.getElementById('work_experience-modal');
                             if (modal) {
                                 (modal as HTMLDialogElement).showModal();
@@ -371,7 +405,7 @@ export default function ProfilePage() {
                                     <label className="input">
                                         <span className="label">Start date</span>
                                         <input 
-                                            type="date" 
+                                            type="date"
                                             name="start_date" 
                                             value={startDate}
                                             onChange={handleStartDateChange}
@@ -533,11 +567,12 @@ export default function ProfilePage() {
                         </form>
                     </div>
                 </dialog>
-                <div className="w-2/3 mb-4.5">
+                <div className="w-full mb-4.5">
                     <div className="divider divider-error text-error">Danger Zone</div>
                     <button className="btn btn-error w-full">DELETE ACCOUNT</button>
                 </div>
             </div>
         </AppSideBar>
+        </Suspense>
     )
 }

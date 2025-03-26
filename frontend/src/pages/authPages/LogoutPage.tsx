@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast, Bounce } from 'react-toastify';
-
+import TruckLoader from "../../components/TruckLoader"
 const Logout: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ const Logout: React.FC = () => {
     handleLogout();
   }, [logout, navigate]);
 
-  return <div>Logging out...</div>;
+  return <TruckLoader />;
 };
 
 export default Logout;
