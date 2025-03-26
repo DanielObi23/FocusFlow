@@ -35,6 +35,7 @@ export const uploadProfileImage = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
+        console.log("1")
         const {
             email,
             firstName,
@@ -42,45 +43,26 @@ export const updateProfile = async (req, res) => {
             phoneNumber,
             imageUrl
         } = req.body
-        console.log({
-            email,
-            firstName,
-            lastName,
-            phoneNumber,
-            imageUrl
-        })
-        const users = await sql`
+        
+        // Construct full S3 URL if not already full URL
+        const fullImageUrl = imageUrl.startsWith('http') 
+            ? imageUrl 
+            : `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${imageUrl}`
+        
+        const user = await sql`
             UPDATE users
             SET first_name = ${firstName},
                 last_name = ${lastName},
                 phone_number = ${phoneNumber},
-                profile_image_url = ${imageUrl}
+                profile_image_url = ${fullImageUrl}
             WHERE email = ${email} RETURNING *
         `;
 
-        if (users.length === 0) {
+        if (user.length === 0) {
             return res.status(404).json({message: "User not found"})
         }
 
-        const { 
-            username,
-            profile_image_url, 
-            created_at, 
-            first_name, 
-            last_name, 
-            phone_number 
-        } = users[0];
-
-        const response = {
-            username, 
-            email, 
-            profile_image_url, 
-            created_at, 
-            first_name, 
-            last_name, 
-            phone_number
-        };
-        res.status(200).json(response);
+        res.status(200).json(user[0]);
     } catch (err) {
         console.error(err);
         res.status(500).json({message: "Invalid request"})

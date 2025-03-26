@@ -17,7 +17,6 @@ const initDB = async () => {
                 password_reset_expires TIMESTAMP,
                 profile_image_url VARCHAR(255),
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP WITH TIME ZONE
             )`;
 

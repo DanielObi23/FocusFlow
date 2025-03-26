@@ -21,7 +21,8 @@ export const s3 = new S3Client({
 const randomBytes = promisify(crypto.randomBytes)
 
 export async function generateUploadURL() {
-    const imageName = randomBytes(16).toString("hex")
+    const bytes = await randomBytes(16); // Await the random bytes
+    const imageName = bytes.toString('hex'); // Convert to hex string
     
     const params = {
         Bucket: bucketName,

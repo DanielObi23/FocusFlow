@@ -69,10 +69,8 @@ export default function ProfilePage() {
         setEndDate(e.target.value);
     };
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    async function updateProfile(formData: FormData){
         try {
-            const formData = new FormData(e.currentTarget);
             const image = formData.get("image")
             const firstName = formData.get("first_name")
             const lastName = formData.get("last_name")
@@ -285,9 +283,9 @@ export default function ProfilePage() {
                             }}>Edit Info</button>
                             <dialog id="profile-modal" className="modal">
                                 <div className="modal-box w-full">
-                                    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+                                    <form action={updateProfile} className="flex flex-col gap-4 w-full">
                                         <div className="flex gap-1">
-                                            <input type="file" name="image" className="file-input w-full" /> 
+                                            <input type="file" name="image" className="file-input w-full" defaultValue={userProfile.profile_image_url || ""} /> 
                                             <div className="tooltip tooltip-left" data-tip="Profile image">
                                                 <p className="btn"><FaInfo /></p>
                                             </div>
@@ -314,7 +312,12 @@ export default function ProfilePage() {
                                                     (modal as HTMLDialogElement).close();
                                                 }
                                             }}>Cancel</button>
-                                            <button type="submit" className="btn">Save changes</button>
+                                            <button type="submit" className="btn" onClick={()=>{
+                                                const modal = document.getElementById('profile-modal');
+                                                if (modal) {
+                                                    (modal as HTMLDialogElement).close();
+                                                }
+                                            }}>Save changes</button>
                                         </div>
                                     </form>
                                 </div>

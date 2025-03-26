@@ -23,7 +23,7 @@ export default function Header() {
     >
       <div className="flex items-center gap-2">
         <Link to="/profile">
-          <img src={profileImage.length > 0? profileImage : avatar} alt="profile settings" className="size-15 md:size-17 lg:hidden  object-cover rounded-full"/>
+          <img src={profileImage? profileImage : avatar} alt="profile settings" className="size-15 md:size-17 lg:hidden  object-cover rounded-full"/>
         </Link>
         <Link to="/">
           <img src={logo} alt="FocusFlow logo" className="size-18 hidden lg:block xl:active:size-24 xl:active:animate-bounce xl:active:translate-x-150 duration-3000"/>
@@ -36,7 +36,7 @@ export default function Header() {
           <Link to="/paths" className="md:focus:outline-2 md:focus:border-b-0 md:focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in">Paths <span className="hidden xl:inline">Library</span></Link>
         </div>
         <Link to="/profile" className="lg:ms-20 lg:me-10 hidden lg:block">
-          <img src={profileImage.length > 0? profileImage : avatar} alt="profile settings" className="size-15 lg:size-20 object-cover rounded-full"/>
+          <img src={profileImage? profileImage : avatar} alt="profile settings" className="size-15 lg:size-20 object-cover rounded-full"/>
         </Link>
       </nav>
     </header>

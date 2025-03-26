@@ -376,7 +376,7 @@ export const resetPassword = async (req, res, next) => {
                 password_reset_token = ${null},
                 password_reset_expires = ${null}
                 WHERE user_id = ${user[0].user_id}`;
-            await sql `UPDATE users SET updated_at = ${time}, last_login = ${time} WHERE user_id = ${user[0].user_id}`
+            await sql `UPDATE users SET last_login = ${time} WHERE user_id = ${user[0].user_id}`
             let tokens = jwtTokens(user[0])
             res.cookie("refreshToken", tokens.refreshToken, {
                 httpOnly: true,
