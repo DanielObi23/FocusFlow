@@ -1,5 +1,9 @@
 import {sql} from "../config/db.js"
 import {generateUploadURL} from "../utils/s3.js"
+import sendEmail from "../utils/sendEmail.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const userData = async (req, res) => {
     try {
@@ -141,6 +145,24 @@ export const updateWorkExperience = async (req, res) => {
             RETURNING *
         `;
         res.status(200).json(experience[0])
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Server error"})
+    }
+}
+
+export const sendFeedback = async (req, res) => {
+    try {
+        const { email, subject, message } = req.body;
+        console.log(process.env.MY_EMAIL)
+        sendEmail({
+            myEmail: process.env.MY_EMAIL,
+            subject,
+            text: message,
+            html: `Feedback from ${email}: <br/> <br/>${message}`,
+            name: "user"
+        })
+        res.status(200).json({message: "Feedback sent"})
     } catch (err) {
         console.error(err);
         res.status(500).json({message: "Server error"})

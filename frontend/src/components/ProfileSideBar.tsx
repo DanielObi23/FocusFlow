@@ -13,7 +13,7 @@ interface AppSideBarProps {
             <div className="drawer-content">
                 <label 
                     htmlFor="my-drawer-2" 
-                    className="btn btn-primary drawer-button lg:hidden fixed top-37 right-4 z-50"
+                    className="btn btn-primary btn-md drawer-button lg:hidden fixed top-37 right-4 z-50"
                 >
                     Toggle drawer
                 </label>
@@ -29,11 +29,11 @@ interface AppSideBarProps {
                     <hr />
                     <li className="my-2 font-bold text-xl"><Link to="/profile/achievements">Achievements Library</Link></li>
                     <hr />
-                    <li className="my-2 font-bold text-xl"><Link to="/support">Feedback</Link></li>
+                    <li className="my-2 font-bold text-xl"><Link to="/profile/feedback">Feedback</Link></li>
+                    <hr />
+                    <li className="my-2 font-bold text-xl"><ThemeController /></li>
                     <hr />
                     <li className="my-2 font-bold text-xl"><Link to="/logout">Logout</Link></li>
-                    <hr />
-                    <ThemeController />
                 </ul>
             </div>
         </div>

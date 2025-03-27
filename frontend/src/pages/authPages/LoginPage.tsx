@@ -36,7 +36,7 @@ export default function LoginPage() {
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6 w-full">Welcome Back</h1>
         
         <form action={handleLogin} className="flex flex-col justify-center items-center gap-4 w-full">
-          <div className="w-full" style={{ maxWidth: "100%" }}>
+          <div className="w-full">
             <label className="input validator w-full">
               <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
@@ -56,7 +56,7 @@ export default function LoginPage() {
             <div className="validator-hint hidden">Enter valid email address</div>
           </div>
           
-          <div className="w-full" style={{ maxWidth: "100%" }}>
+          <div className="w-full">
             <label className="input validator w-full">
               <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">

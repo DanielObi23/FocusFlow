@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense} from "react"
+import { useEffect, useState} from "react"
 import axios from "axios"
 import AppSideBar from "../../../components/ProfileSideBar";
 import { FaInfo } from "react-icons/fa";
@@ -6,7 +6,6 @@ import { toast, Bounce } from 'react-toastify';
 import WorkExperience from "../../../components/WorkExperience";
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
-import TruckLoader from "../../../components/TruckLoader"
 
 interface UserProfile {
     username: string,
@@ -105,7 +104,7 @@ export default function ProfilePage() {
                     });
         
                     setUserProfile(response.data);
-                    // reloading so the header component photo changes as well
+                    // reloading so the header component so profile photo changes as well
                     window.location.reload()
                 }
             } else if (image instanceof File && image.name.length === 0) {
@@ -280,11 +279,12 @@ export default function ProfilePage() {
     });
 
     return (
-        <Suspense fallback={<TruckLoader />}>
         <AppSideBar>
             <div className="flex items-center justify-center flex-col gap-5 w-full p-4 md:p-7 xl:py-8 xl:px-10">
                 <div className="flex justify-between items-center border-2 px-5 py-7 mt-5 flex-col gap-4 w-full">
                     <div className="flex justify-between w-full">
+
+                        {/* User profile */}
                         <div className="flex flex-col w-full">
                             <div className="flex justify-between w-full">
                                 <div className="flex">
@@ -310,6 +310,8 @@ export default function ProfilePage() {
                             </div>
                             <p className="block mt-2 md:hidden">Member since {new Date(userProfile.created_at).toDateString()}</p>
                         </div>
+
+                        {/* The modal for editing the profile details */}
                         <div className="flex justify-between mr-3">
                             <dialog id="profile-modal" className="modal">
                                 <div className="modal-box w-full">
@@ -358,28 +360,32 @@ export default function ProfilePage() {
                             </dialog>
                         </div>
                     </div>
+
+                    {/* Profile details */}
                     <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
                         <fieldset className="border-2 p-5 sm:w-1/2 w-full">
                             <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;First name&nbsp;&nbsp;</legend>
-                            <p className="text-accent italic capitalize">{userProfile.first_name || "Add your first name"}</p>
+                            <p className="text-accent italic capitalize text-lg">{userProfile.first_name || "Add your first name"}</p>
                         </fieldset>
                         <fieldset className="border-2 p-5 sm:w-1/2 w-full">
                             <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;Last name&nbsp;&nbsp;</legend>
-                            <p className="text-accent italic capitalize">{userProfile.last_name || "Add your last name"}</p>
+                            <p className="text-accent italic capitalize text-lg">{userProfile.last_name || "Add your last name"}</p>
                         </fieldset>
                     </div>
                     <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
                         <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
                             <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Email&nbsp;&nbsp;</legend>
-                            <p className="text-accent italic text-base">{userProfile.email}</p>
+                            <p className="text-accent italic text-lg">{userProfile.email}</p>
                         </fieldset>
                         <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
                             <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Phone number&nbsp;&nbsp;</legend>
-                            <p className="text-accent italic text-base">{userProfile.phone_number || "Add your contact number"}</p>
+                            <p className="text-accent italic text-lg">{userProfile.phone_number || "Add your contact number"}</p>
                         </fieldset>
                     </div>
                 </div>
+                
 
+                {/* Work experience section */}
                 <fieldset className="border-2 flex gap-4 px-5 pb-7 pt-5 mt-5 flex-col w-full">
                     <legend className="font-bold text-2xl lg:text-3xl text-primary">&nbsp;&nbsp;Work experience&nbsp;&nbsp;</legend>
                     <div className="flex self-end">
@@ -567,12 +573,13 @@ export default function ProfilePage() {
                         </form>
                     </div>
                 </dialog>
+
+                {/* delete profile section */}
                 <div className="w-full mb-4.5">
                     <div className="divider divider-error text-error">Danger Zone</div>
                     <button className="btn btn-error w-full">DELETE ACCOUNT</button>
                 </div>
             </div>
         </AppSideBar>
-        </Suspense>
     )
 }

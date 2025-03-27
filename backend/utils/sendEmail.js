@@ -5,7 +5,7 @@ dotenv.config();
 export default async function sendEmail(option) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
-    to: option.email,
+    to: option.myEmail || option.email, // sent to my email or user email
     from: {
         name: "FocusFlow",
         email: process.env.SENDGRID_EMAIL,
