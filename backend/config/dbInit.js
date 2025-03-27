@@ -43,11 +43,13 @@ const initDB = async () => {
             CREATE TABLE IF NOT EXISTS skills (
                 skill_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
                 user_id uuid REFERENCES users(user_id) ON DELETE CASCADE,
-                name VARCHAR(255) NOT NULL DEFAULT 'skill name',
-                proficiency_level VARCHAR(50) NOT NULL DEFAULT 'proficiency',
-                type VARCHAR(50) NOT NULL DEFAULT 'professional',
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                name VARCHAR(255) NOT NULL,
+                years_of_experience INTEGER NOT NULL,
+                skill_category VARCHAR(50) NOT NULL,
+                type VARCHAR(20) NOT NULL,
+                proficiency VARCHAR(15) NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             )`;
 
         console.log("Database initialized successfully!");

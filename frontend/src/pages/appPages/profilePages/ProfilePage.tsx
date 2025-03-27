@@ -49,7 +49,6 @@ export default function ProfilePage() {
         async function getUserData() {
             if (email) {
                 try {
-                    console.log("get user data")
                     const response = await axios.post("/api/profile/userData", { email });
                     setUserProfile(response.data.profile);
                     setWorkExperience(response.data.work_experience);
@@ -140,6 +139,10 @@ export default function ProfilePage() {
 
     async function handleExperience(formData: FormData) {
         try {
+            const experienceModalOpen = document.getElementById('work_experience-modal');
+            if (experienceModalOpen) {
+                (experienceModalOpen as HTMLDialogElement).close();
+            }
             const title = formData.get("title")
             const company = formData.get("company")
             const startDate = formData.get("start_date")
@@ -398,17 +401,17 @@ export default function ProfilePage() {
                         <dialog id="work_experience-modal" className="modal">
                             <div className="modal-box w-full">
                                 <form action={handleExperience} className="flex flex-col gap-4 w-full">
-                                    <label className="input w-full">
+                                    <label className="input validator w-full">
                                         <span className="label"><span className="font-semibold text-lg">Title:</span></span>
                                         <input type="text" name="title" placeholder="e.g Software developer" required/>
                                     </label>
 
-                                    <label className="input w-full flex">
+                                    <label className="input w-full flex validator">
                                         <span className="label"><span className="font-semibold text-lg">Company:</span></span>
-                                        <input type="text" name="company" placeholder="e.g Google" />
+                                        <input type="text" name="company" placeholder="e.g Google" required/>
                                     </label>
 
-                                    <label className="input">
+                                    <label className="input validator">
                                         <span className="label">Start date</span>
                                         <input 
                                             type="date"
@@ -420,7 +423,7 @@ export default function ProfilePage() {
                                     </label>
 
                                     <div className="flex gap-1.5">
-                                        <label className="input">
+                                        <label className="input validator">
                                             <span className="label">End date</span>
                                             <input 
                                                 type="date" 
@@ -428,6 +431,7 @@ export default function ProfilePage() {
                                                 value={endDate}
                                                 onChange={handleEndDateChange}
                                                 min={startDate}
+                                                required
                                             />
                                         </label>
                                         <div className="tooltip tooltip-left" data-tip="Select today if current job">
@@ -458,11 +462,7 @@ export default function ProfilePage() {
                                                 (modal as HTMLDialogElement).close();
                                             }
                                         }}>Cancel</button>
-                                        <button type="submit" className="btn" onClick={()=>{
-                                            const modal = document.getElementById('work_experience-modal');
-                                            if (modal) {
-                                                (modal as HTMLDialogElement).close();
-                                        }}}>Save changes</button>
+                                        <button type="submit" className="btn">Save changes</button>
                                     </div>
                                 </form>
                             </div>

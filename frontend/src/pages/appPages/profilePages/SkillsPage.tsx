@@ -1,10 +1,132 @@
 import AppSideBar from "../../../components/ProfileSideBar";
 import SkillCard from "../../../components/SkillCard";
+import { toast, Bounce } from 'react-toastify';
+import axios from "axios"
+import {useState, useEffect} from "react"
+
+interface Skills {
+    name: string;
+    years_of_experience: number;
+    type: string;
+    skill_category: string;
+    proficiency: string;
+    description: string;
+    created_at: string;
+    skill_id: string;
+}
 export default function SkillsPage() {
-    function addSkill() {
-        // Add skill logic here
-        console.log('Adding skill');
+    const email = localStorage.getItem('email');
+    const [skills, setSkills] = useState<Skills[]>([]);
+
+    useEffect(() => {
+        async function fetchSkills() {
+            try {
+                const response = await axios.post(`/api/profile/skills/getAllSkills`, {email})
+                setSkills(response.data);
+            } catch (err) {
+                toast.error("Failed to load skills", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    transition: Bounce,
+                });
+            }
+        }
+        fetchSkills();
+    }, [email]);
+
+    async function addSkill(formData: FormData) {
+        try {
+            const modal = document.getElementById('add_skill-modal');
+            if (modal) {
+                (modal as HTMLDialogElement).close();
+            }
+            const skillName = formData.get("skill_name")
+            const yearsOfExperience = formData.get("years_of_experience")
+            const yearsOfExperienceInt = parseInt(yearsOfExperience as string || "0");
+            const type = formData.get("type")
+            const skillCategory = formData.get("skill_category")
+            const proficiency = formData.get("proficiency")
+            const description = formData.get("description")
+
+            const response = await axios.post("/api/profile/skills/addSkill", {
+                skillName,
+                yearsOfExperienceInt,
+                type,
+                skillCategory,
+                proficiency,
+                description,
+                email
+            });
+
+            setSkills([...skills, response.data]);
+
+            if (response.status === 201) {
+                toast.success(`Skill has been added`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    transition: Bounce,
+                });
+            }
+        } catch (error) {
+            toast.error(`Server error, please try again later`, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+            });
+            console.error(error)
+        }
     }
+
+    function getSkillList(category: string) {
+        return skills
+            .filter(skill => skill.skill_category === category)
+            .map(skill => <SkillCard key={skill.skill_id} detail={skill} />);
+
+    }
+
+    const technicalSkills = getSkillList("Technical Skills")
+    const designSkills = getSkillList("Design Skills")
+    const businessSkills = getSkillList("Business & Management")
+    const creativeSkills = getSkillList("Creative Skills")
+    const languageSkills = getSkillList("Languages")
+    const physicalSkills = getSkillList("Physical And Wellness")
+    const culinarySkills = getSkillList("Culinary Skills")
+    const musicSkills = getSkillList("Music And Performance")
+    const outdoorSkills = getSkillList("Outdoor & Adventure")
+    const softSkills = getSkillList("Soft Skills")
+
+    const sectionList = [technicalSkills, designSkills, businessSkills, creativeSkills, languageSkills, physicalSkills, culinarySkills, musicSkills, outdoorSkills, softSkills]
+    const categoryNames = ["Technical Skills", "Design Skills", "Business & Management", "Creative Skills", "Languages", "Physical And Wellness", "Culinary Skills", "Music And Performance", "Outdoor & Adventure", "Soft Skills"]
+
+    const section = sectionList
+                    .filter(sectionCategory => sectionCategory.length > 0)
+                    .map((sectionCategory, index) => (
+                        <div className="flex flex-col gap-2" key={index}>
+                            <h1 className="self-start text-lg font-bold">{categoryNames[index]}</h1>
+                            <div className="w-full flex gap-2.5 overflow-auto">
+                                {sectionCategory}
+                            </div>
+                        </div>
+                    ));
+
     return (
         <AppSideBar>
             <div className="w-full p-7">
@@ -26,25 +148,51 @@ export default function SkillsPage() {
                                     <form action={addSkill} className="flex flex-col gap-4 w-full">
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend text-base">Skill Name</legend>
-                                            <input type="text" className="input w-full" placeholder="e.g TypeScript, Adobe XD, Blender" />
+                                            <input type="text" className="input w-full validator" name="skill_name" maxLength={30} placeholder="e.g TypeScript, Adobe XD, Blender" required/>
                                         </fieldset>
                                         
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend text-base">Years of Experience</legend>
-                                            <input type="number" className="input w-full" placeholder="e.g. 3, 5, 10" min="0" />
+                                            <input type="number" name="years_of_experience" className="input w-full validator" placeholder="e.g. 3, 5, 10" min="0" max="90" required/>
+                                            <p className="validator-hint">Must be between be 0 to 100</p>
                                         </fieldset>
 
-                                        <select defaultValue="" className="select w-full" name="professional_skill_category" required>
+                                        <select defaultValue="" className="select w-full" name="skill_category" required>
                                             <option value="" disabled>Select skill category</option>
-                                            <option value="TechnicalSkills">Technical Skills</option>
-                                            <option value="DesignSkills">Design Skills</option>
-                                            <option value="BusinessManagement">Business & Management</option>
-                                            <option value="CreativeSkills">Creative Skills</option>
+                                            <option value="Technical Skills">Technical Skills</option>
+                                            <option value="Design Skills">Design Skills</option>
+                                            <option value="Business & Management">Business & Management</option>
+                                            <option value="Creative Skills">Creative Skills</option>
                                             <option value="Languages">Languages</option>
-                                            <option value="PhysicalAndWellness">Physical & Wellness</option>
-                                            <option value="CulinarySkills">Culinary Skills</option>
-                                            <option value="SoftSkills">Soft Skills</option>
+                                            <option value="Physical And Wellness">Physical & Wellness</option>
+                                            <option value="Culinary Skills">Culinary Skills</option>
+                                            <option value="Music And Performance">Music & Performance</option>
+                                            <option value="Outdoor And Adventure">Outdoor & Adventure</option>
+                                            <option value="Soft Skills">Soft Skills</option>
                                         </select>
+
+                                        <fieldset className="fieldset flex gap-5">
+                                            <legend className="fieldset-legend text-base">Skill type</legend>
+                                            <div className="flex items-center space-x-2">
+                                                <input 
+                                                    type="radio" 
+                                                    name="type" 
+                                                    className="radio radio-primary" 
+                                                    value={"professional"}
+                                                    defaultChecked 
+                                                />
+                                                <label className="text-sm">Professional</label>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <input 
+                                                    type="radio" 
+                                                    name="type" 
+                                                    value={"hobby"}
+                                                    className="radio radio-primary" 
+                                                />
+                                                <label className="text-sm">Hobby</label>
+                                            </div>
+                                        </fieldset>
 
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend text-base">Proficiency Level</legend>
@@ -53,6 +201,7 @@ export default function SkillsPage() {
                                                     type="radio" 
                                                     name="proficiency" 
                                                     className="radio radio-primary" 
+                                                    value={"beginner"}
                                                     defaultChecked 
                                                 />
                                                 <label className="text-sm">Beginner</label>
@@ -61,7 +210,8 @@ export default function SkillsPage() {
                                                 <input 
                                                     type="radio" 
                                                     name="proficiency" 
-                                                    className="radio radio-primary" 
+                                                    className="radio radio-primary"
+                                                    value={"intermediate"} 
                                                 />
                                                 <label className="text-sm">Intermediate</label>
                                             </div>
@@ -70,6 +220,7 @@ export default function SkillsPage() {
                                                     type="radio" 
                                                     name="proficiency" 
                                                     className="radio radio-primary" 
+                                                    value={"advanced"}
                                                 />
                                                 <label className="text-sm">Advanced</label>
                                             </div>
@@ -78,6 +229,7 @@ export default function SkillsPage() {
                                                     type="radio" 
                                                     name="proficiency" 
                                                     className="radio radio-primary" 
+                                                    value={"expert"}
                                                 />
                                                 <label className="text-sm">Expert</label>
                                             </div>
@@ -96,11 +248,7 @@ export default function SkillsPage() {
                                                     (modal as HTMLDialogElement).close();
                                                 }
                                             }}>Cancel</button>
-                                            <button type="submit" className="btn" onClick={()=>{
-                                                const modal = document.getElementById('add_skill-modal');
-                                                if (modal) {
-                                                    (modal as HTMLDialogElement).close();
-                                            }}}>Add skill</button>
+                                            <button type="submit" className="btn">Add skill</button>
                                         </div>
                                     </form>
                                 </div>
@@ -115,36 +263,7 @@ export default function SkillsPage() {
                         </div>
                     </div>
                     <hr />
-                    <div className="flex flex-col gap-2">
-                        <h1 className="self-start text-lg font-bold">Technical Skills</h1>
-                        <div className="w-full flex gap-2.5 overflow-auto">
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <h1 className="self-start text-lg font-bold">Design Skills</h1>
-                        <div className="w-full flex gap-2.5 overflow-auto">
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <h1 className="self-start text-lg font-bold">Business Management</h1>
-                        <div className="w-full flex gap-2.5 overflow-auto">
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                            <SkillCard />
-                        </div>
-                    </div>
+                    {section? section : <h1 className="text-4xl">No Skills added</h1>}
                 </div>
             </div>
         </AppSideBar>
