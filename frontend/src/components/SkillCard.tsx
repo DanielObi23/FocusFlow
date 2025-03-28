@@ -18,7 +18,7 @@ interface Skills {
     skill_id: string;
 }
 
-export default function SkillCard({ detail }: { detail: Skills }) {
+export default function SkillCard({ detail, deleteSkill: handleDeleteSkill, handleEditSkill: handleEditSkill }: { detail: Skills; deleteSkill: (id: string) => Promise<void>; handleEditSkill: (detail: Skills) => Promise<void> }) {
     const getProficiencyDetails = () => {
         switch(detail.proficiency.toLowerCase()) {
             case 'beginner':
@@ -55,7 +55,8 @@ export default function SkillCard({ detail }: { detail: Skills }) {
                 <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-secondary" />
                     <span className="text-base">
-                        {detail.years_of_experience} {detail.years_of_experience === 1 ? 'year' : 'years'} of experience
+                        {detail.years_of_experience < 1? "<1" : detail.years_of_experience}&nbsp;
+                        {detail.years_of_experience > 1 ? 'years' : 'year'} of experience
                     </span>
                 </div>
 
@@ -72,8 +73,8 @@ export default function SkillCard({ detail }: { detail: Skills }) {
             </div>          
 
             <div className="flex w-full justify-between mt-2">
-                <button className="btn btn-info"><Edit2 className="w-4 h-4" /> Edit</button>
-                <button className="btn btn-error ml-1.5"><Trash2 className="w-4 h-4" /> Remove</button>
+                <button className="btn btn-info" onClick={() => handleEditSkill(detail)}><Edit2 className="w-4 h-4" /> Edit</button>
+                <button className="btn btn-error ml-1.5" onClick={() => handleDeleteSkill(detail.skill_id)}><Trash2 className="w-4 h-4" /> Remove</button>
             </div>
         </div>
     )

@@ -139,9 +139,16 @@ export const updateWorkExperience = async (req, res) => {
             description
         } = req.body
         const experience = await sql`
-            UPDATE work_experience 
-            SET title = ${title}, company = ${company}, experience_category = ${experienceCategory}, start_date = ${startDate}, end_date = ${endDate}, description = ${description}
-            WHERE experience_id = ${req.params.id}
+            UPDATE 
+                work_experience 
+            SET title = ${title}, 
+                company = ${company}, 
+                experience_category = ${experienceCategory}, 
+                start_date = ${startDate}, 
+                end_date = ${endDate}, 
+                description = ${description}
+            WHERE 
+                experience_id = ${req.params.id}
             RETURNING *
         `;
         res.status(200).json(experience[0])

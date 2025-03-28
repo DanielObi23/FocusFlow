@@ -103,7 +103,7 @@ export default function ProfilePage() {
                     });
         
                     setUserProfile(response.data);
-                    // reloading so the header component so profile photo changes as well
+                    // reloading so the header component profile photo changes as well
                     window.location.reload()
                 }
             } else if (image instanceof File && image.name.length === 0) {
@@ -137,6 +137,20 @@ export default function ProfilePage() {
         }
     }
 
+    function addExperience() {
+        // clearing the input field
+        (document.querySelector('input[name="title"]') as HTMLInputElement).value = "";
+        (document.querySelector('input[name="company"]') as HTMLInputElement).value = "";
+        (document.querySelector('input[name="start_date"]') as HTMLInputElement).value = "";
+        (document.querySelector('input[name="end_date"]') as HTMLInputElement).value = "";
+        (document.querySelector('select[name="experience_category"]') as HTMLSelectElement).value = "";
+        (document.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = "";
+        const modal = document.getElementById('work_experience-modal');
+        if (modal) {
+            (modal as HTMLDialogElement).show();
+        }
+    }
+    
     async function handleExperience(formData: FormData) {
         try {
             const experienceModalOpen = document.getElementById('work_experience-modal');
@@ -150,7 +164,7 @@ export default function ProfilePage() {
             const experienceCategory = formData.get("experience_category")
             const description = formData.get("description")
     
-            const modal = document.getElementById('edit-modal');
+            const modal = document.getElementById('work_experience-modal');
             const existingDetailStr = modal?.getAttribute('data-experience-detail');
             
             if (existingDetailStr) {
@@ -245,7 +259,7 @@ export default function ProfilePage() {
     }
 
     async function editExperience(detail: WorkExperienceItem) {
-        const modal = document.getElementById('edit-modal');
+        const modal = document.getElementById('work_experience-modal');
         if (modal) {
             modal.setAttribute('data-experience-detail', JSON.stringify(detail));
             
@@ -256,10 +270,7 @@ export default function ProfilePage() {
                 (form.querySelector('input[name="company"]') as HTMLInputElement).value = detail.company;
                 (form.querySelector('input[name="start_date"]') as HTMLInputElement).value = detail.start_date;
                 (form.querySelector('input[name="end_date"]') as HTMLInputElement).value = detail.end_date || '';
-                
-                const categorySelect = form.querySelector('select[name="experience_category"]') as HTMLSelectElement;
-                categorySelect.value = detail.experience_category;
-                
+                (form.querySelector('select[name="experience_category"]') as HTMLSelectElement).value = detail.experience_category;
                 (form.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = detail.description;
             }
             
@@ -392,12 +403,7 @@ export default function ProfilePage() {
                 <fieldset className="border-2 flex gap-4 px-5 pb-7 pt-5 mt-5 flex-col w-full">
                     <legend className="font-bold text-2xl lg:text-3xl text-primary">&nbsp;&nbsp;Work experience&nbsp;&nbsp;</legend>
                     <div className="flex self-end">
-                        <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
-                            const modal = document.getElementById('work_experience-modal');
-                            if (modal) {
-                                (modal as HTMLDialogElement).showModal();
-                            }
-                        }}>Add Experience</button>
+                        <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={addExperience}>Add Experience</button>
                         <dialog id="work_experience-modal" className="modal">
                             <div className="modal-box w-full">
                                 <form action={handleExperience} className="flex flex-col gap-4 w-full">
@@ -462,7 +468,7 @@ export default function ProfilePage() {
                                                 (modal as HTMLDialogElement).close();
                                             }
                                         }}>Cancel</button>
-                                        <button type="submit" className="btn">Save changes</button>
+                                        <button type="submit" className="btn">Save</button>
                                     </div>
                                 </form>
                             </div>
@@ -499,78 +505,6 @@ export default function ProfilePage() {
                                 Delete
                             </button>
                         </div>
-                    </div>
-                </dialog>
-                <dialog id="edit-modal" className="modal">
-                    <div className="modal-box w-full">
-                        <form action={handleExperience} className="flex flex-col gap-4 w-full">
-                            <label className="input w-full">
-                                <span className="label"><span className="font-semibold text-lg">Title:</span></span>
-                                <input type="text" name="title" placeholder="e.g Software developer" required/>
-                            </label>
-
-                            <label className="input w-full flex">
-                                <span className="label"><span className="font-semibold text-lg">Company:</span></span>
-                                <input type="text" name="company" placeholder="e.g Google" />
-                            </label>
-
-                            <label className="input">
-                                <span className="label">Start date</span>
-                                <input 
-                                    type="date" 
-                                    name="start_date" 
-                                    value={startDate}
-                                    onChange={handleStartDateChange}
-                                    required
-                                />
-                            </label>
-
-                            <div className="flex gap-1.5">
-                                <label className="input">
-                                    <span className="label">End date</span>
-                                    <input 
-                                        type="date" 
-                                        name="end_date"
-                                        value={endDate}
-                                        onChange={handleEndDateChange}
-                                        min={startDate}
-                                    />
-                                </label>
-                                <div className="tooltip tooltip-left" data-tip="Select today if current job">
-                                    <p className="btn"><FaInfo /></p>
-                                </div>
-                            </div>
-
-                            <select defaultValue="" className="select w-full" name="experience_category" required>
-                                <option value="" disabled>Select the type of experience</option>
-                                <option value="Full-time">Full-time</option>
-                                <option value="Part-time">Part-time</option>
-                                <option value="Intern">Intern</option>
-                                <option value="Contract">Contract</option>
-                                <option value="Volunteer">Volunteer</option>
-                                <option value="Hobby">Hobby</option>
-                            </select>
-
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Your role</legend>
-                                <textarea className="textarea w-full field-sizing-content" placeholder="Description" name="description"></textarea>
-                                <div className="fieldset-label">Optional but recommended</div>
-                            </fieldset>
-
-                            <div className="w-full flex justify-between">
-                                <button type="button" className="btn" onClick={()=>{
-                                    const modal = document.getElementById('edit-modal');
-                                    if (modal) {
-                                        (modal as HTMLDialogElement).close();
-                                    }
-                                }}>Cancel</button>
-                                <button type="submit" className="btn" onClick={()=>{
-                                    const modal = document.getElementById('edit-modal');
-                                    if (modal) {
-                                        (modal as HTMLDialogElement).close();
-                                }}}>Save changes</button>
-                            </div>
-                        </form>
                     </div>
                 </dialog>
 

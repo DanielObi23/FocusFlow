@@ -3,7 +3,6 @@ import SkillCard from "../../../components/SkillCard";
 import { toast, Bounce } from 'react-toastify';
 import axios from "axios"
 import {useState, useEffect} from "react"
-//import {Link} from "react-router-dom"
 
 interface Skills {
     name: string;
@@ -19,7 +18,8 @@ export default function SkillsPage() {
     const email = localStorage.getItem('email');
     const [skills, setSkills] = useState<Skills[]>([]);
     const [searchItem, setSearchItem] = useState('')
-    const [filteredSkills, setfilteredSkills] = useState(skills)
+    const [filteredSkills, setFilteredSkills] = useState(skills)
+    const [render, forceReRender] = useState(0); // page wasn't rerendering when skill state was changed
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
         const searchTerm = e.target.value;
@@ -28,22 +28,21 @@ export default function SkillsPage() {
             skill.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
         
-        setfilteredSkills(filteredItems);
+        setFilteredSkills(filteredItems);
     }
 
     function filterByProficiency(proficiency: string) {
         const filteredItems = skills.filter((skill) =>
             skill.proficiency === proficiency
             );
-        //console.log()
-        setfilteredSkills(filteredItems);
+        setFilteredSkills(filteredItems);
     }
     
     function filterByType(type: string) {
         const filteredItems = skills.filter((skill) =>
             skill.type === type
             );
-        setfilteredSkills(filteredItems);
+        setFilteredSkills(filteredItems);
     }
 
     useEffect(() => {
@@ -51,7 +50,7 @@ export default function SkillsPage() {
             try {
                 const response = await axios.post(`/api/profile/skills/getAllSkills`, {email})
                 setSkills(response.data);
-                setfilteredSkills(response.data);
+                setFilteredSkills(response.data);
             } catch (err) {
                 toast.error("Failed to load skills", {
                     position: "top-center",
@@ -67,13 +66,33 @@ export default function SkillsPage() {
             }
         }
         fetchSkills();
-    }, [email]);
+    }, [render]);
 
-    async function addSkill(formData: FormData) {
+    function addSkill() {
+        // clearing the input field
+        (document.querySelector('input[name="skill_name"]') as HTMLInputElement).value = "";
+        (document.querySelector('input[name="years_of_experience"]') as HTMLInputElement).value = "";
+        const typeInput = document.querySelector(`input[name="type"][value="professional"]`) as HTMLInputElement;
+        if (typeInput) {
+            typeInput.checked = true;
+        }
+        const proficiencyInput = document.querySelector(`input[name="proficiency"][value="beginner"]`) as HTMLInputElement;
+        if (proficiencyInput) {
+            proficiencyInput.checked = true;
+        }
+        (document.querySelector('select[name="skill_category"]') as HTMLSelectElement).value = "";
+        (document.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = "";
+        const modal = document.getElementById('skill-modal');
+        if (modal) {
+            (modal as HTMLDialogElement).show();
+        }
+    }
+    
+    async function handleSkill(formData: FormData) {
         try {
-            const modal = document.getElementById('add_skill-modal');
-            if (modal) {
-                (modal as HTMLDialogElement).close();
+            const skillModalOpen = document.getElementById('skill-modal');
+            if (skillModalOpen) {
+                (skillModalOpen as HTMLDialogElement).close();
             }
             const skillName = formData.get("skill_name")
             const yearsOfExperience = formData.get("years_of_experience")
@@ -82,34 +101,52 @@ export default function SkillsPage() {
             const skillCategory = formData.get("skill_category")
             const proficiency = formData.get("proficiency")
             const description = formData.get("description")
-
-            const response = await axios.post("/api/profile/skills/addSkill", {
-                skillName,
-                yearsOfExperienceInt,
-                type,
-                skillCategory,
-                proficiency,
-                description,
-                email
-            });
-
-            setSkills([...skills, response.data]);
-
-            if (response.status === 201) {
-                toast.success(`Skill has been added`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
+    
+            const modal = document.getElementById('edit-modal');
+            const existingDetailStr = modal?.getAttribute('data-experience-detail');
+            
+            if (existingDetailStr) {
+                const existingDetail = JSON.parse(existingDetailStr);
+                const skillUpdateResponse = await axios.put(`/api/profile/skills/updateSkill/${existingDetail.experience_id}`, {
+                    skillName,
+                    yearsOfExperienceInt,
+                    type,
+                    skillCategory,
+                    proficiency,
+                    description
                 });
+                console.log(skillUpdateResponse.data )
+    
+                setSkills(prev => 
+                    prev.map(skill => 
+                        skill.skill_id === existingDetail.skill_id 
+                        ? skillUpdateResponse.data 
+                        : skill
+                    )
+                );
+                forceReRender(prev => prev + 1);
+            } else {
+                const response = await axios.post("/api/profile/skills/addSkill", {
+                    skillName,
+                    yearsOfExperienceInt,
+                    type,
+                    skillCategory,
+                    proficiency,
+                    description,
+                    email
+                });
+    
+                setSkills([...skills, response.data]);
+                forceReRender(prev => prev + 1);
             }
-        } catch (error) {
-            toast.error(`Server error, please try again later`, {
+    
+            const skillModal = document.getElementById('skill-modal');
+            if (skillModal) {
+                (skillModal as HTMLDialogElement).close();
+            }
+    
+        } catch (err) {
+            toast.error(`Error updating experience, please try again later`, {
                 position: "top-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -120,15 +157,84 @@ export default function SkillsPage() {
                 theme: "colored",
                 transition: Bounce,
             });
-            console.error(error)
+            console.error(err);
         }
     }
+
+    
+    async function editSKill(detail: Skills) {
+        const modal = document.getElementById('skill-modal');
+        if (modal) {
+            modal.setAttribute('data-experience-detail', JSON.stringify(detail));
+            
+            const form = modal.querySelector('form') as HTMLFormElement;
+            
+            if (form) {
+                (form.querySelector('input[name="skill_name"]') as HTMLInputElement).value = detail.name;
+                (form.querySelector('input[name="years_of_experience"]') as HTMLInputElement).value = detail.years_of_experience.toString();
+                const typeInput = form.querySelector(`input[name="type"][value="${detail.type}"]`) as HTMLInputElement;
+                if (typeInput) {
+                    typeInput.checked = true;
+                }
+                const proficiencyInput = form.querySelector(`input[name="proficiency"][value="${detail.proficiency}"]`) as HTMLInputElement;
+                if (proficiencyInput) {
+                    proficiencyInput.checked = true;
+                }
+                (form.querySelector('select[name="skill_category"]') as HTMLSelectElement).value = detail.skill_category;
+                (form.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = detail.description;
+            }
+            
+            (modal as HTMLDialogElement).showModal();
+        }
+    }
+
+    async function deleteSkill(id: string) {
+        const modal = document.getElementById('delete-modal');
+        if (modal) {
+            modal.setAttribute('data-experience-id', id);
+            (modal as HTMLDialogElement).showModal();
+        }
+    }
+
+    async function handleConfirmedDelete() {
+        const modal = document.getElementById('delete-modal');
+        if (!modal) return;
+
+        const skillId = modal.getAttribute('data-experience-id');
+        if (!skillId) return;
+
+        try {
+            const response = await axios.delete(`/api/profile/skills/deleteSkill/${skillId}`);
+            setSkills(response.data);
+            forceReRender(prev => prev + 1);
+            (modal as HTMLDialogElement).close();
+        } catch (err) {
+            toast.error(`Error deleting experience, please try again later`, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+            });
+            console.error(err);
+        }
+    }
+
 
     function getSkillList(category: string) {
         // I'm using filtered skills because the default value is equal to skills, when i start filtering, i want the filtered list to change but not the actual skill list
         return {skills: filteredSkills
                     .filter(skill => skill.skill_category === category)
-                    .map(skill => <SkillCard key={skill.skill_id} detail={skill} />),
+                    .map(skill => <SkillCard
+                                     key={skill.skill_id}
+                                     detail={skill} 
+                                     deleteSkill={deleteSkill}
+                                     handleEditSkill={editSKill}
+                                     />),
                 categoryName: category
         }
     }
@@ -156,7 +262,8 @@ export default function SkillsPage() {
                         </div>
                     </div>
                 ));
-
+    
+            
     return (
         <AppSideBar>
             <div className="w-full p-7">
@@ -172,15 +279,10 @@ export default function SkillsPage() {
                                     placeholder='Search'
                                 />
                             </label>
-                            <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
-                                const modal = document.getElementById('add_skill-modal');
-                                if (modal) {
-                                    (modal as HTMLDialogElement).showModal();
-                                }
-                            }}>Add New Skill</button>
-                            <dialog id='add_skill-modal' className="modal p-5">
+                            <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={addSkill}>Add New Skill</button>
+                            <dialog id='skill-modal' className="modal p-5">
                                 <div className="modal-box w-full">
-                                    <form action={addSkill} className="flex flex-col gap-4 w-full">
+                                    <form action={handleSkill} className="flex flex-col gap-4 w-full">
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend text-base">Skill Name</legend>
                                             <input type="text" className="input w-full validator" name="skill_name" maxLength={30} placeholder="e.g TypeScript, Adobe XD, Blender" required/>
@@ -214,7 +316,6 @@ export default function SkillsPage() {
                                                     name="type" 
                                                     className="radio radio-primary" 
                                                     value={"professional"}
-                                                    defaultChecked 
                                                 />
                                                 <label className="text-sm">Professional</label>
                                             </div>
@@ -278,19 +379,19 @@ export default function SkillsPage() {
 
                                         <div className="w-full flex justify-between">
                                             <button type="button" className="btn" onClick={()=>{
-                                                const modal = document.getElementById('add_skill-modal');
+                                                const modal = document.getElementById('skill-modal');
                                                 if (modal) {
                                                     (modal as HTMLDialogElement).close();
                                                 }
                                             }}>Cancel</button>
-                                            <button type="submit" className="btn">Add skill</button>
+                                            <button type="submit" className="btn">Save skill</button>
                                         </div>
                                     </form>
                                 </div>
                             </dialog>
                         </div>
                         <div className="flex gap-2 items-center overflow-auto px-2 py-1 lg:w-3/5">
-                            <button className="btn btn-neutral btn-md" onClick={() => setfilteredSkills(skills)}>All</button>
+                            <button className="btn btn-neutral btn-md" onClick={() => setFilteredSkills(skills)}>All</button>
                             <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("beginner")}>Beginner</button>
                             <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("intermediate")}>Intermediate</button>
                             <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("advanced")}>Advanced</button>
@@ -300,8 +401,37 @@ export default function SkillsPage() {
                         </div>
                     </div>
                     <hr />
-                    {section.length > 0? section : <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">No Skills Found</h1>}
+                    {section.length > 0? section : <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">No Skill Found</h1>}
                 </div>
+                <dialog id="delete-modal" className="modal">
+                    <div className="modal-box w-full">
+                        <div className="flex flex-col gap-2.5">
+                            <p className="text-lg text-primary">Are you sure you want to delete this skill?</p>
+                            <p className="text-sm text-gray-600">This action cannot be undone.</p>
+                        </div>
+                        <div className="w-full flex justify-between mt-4">
+                            <button 
+                                type="button" 
+                                className="btn" 
+                                onClick={() => {
+                                    const modal = document.getElementById('delete-modal');
+                                    if (modal) {
+                                        (modal as HTMLDialogElement).close();
+                                    }
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn btn-error" 
+                                onClick={handleConfirmedDelete}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </dialog>
             </div>
         </AppSideBar>
     )
