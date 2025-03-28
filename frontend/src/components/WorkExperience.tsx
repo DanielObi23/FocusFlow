@@ -19,7 +19,7 @@ export default function WorkExperience({ detail }: WorkExperienceProps) {
             <div className="card-body">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h3 className="text-xl md:text-2xl font-bold text-primary capitalize">{detail.jobTitle}<span className="hidden md:inline">&nbsp;-&nbsp;</span><span className="text-base-content block md:inline md:text-primary">{detail.companyName}</span></h3>
+                        <h3 className="text-xl md:text-2xl font-bold text-primary capitalize">{detail.jobTitle}<span className="hidden md:inline text-lg text-base-content font-semibold">&nbsp;@&nbsp;</span><span className="font-bold md:font-semibold text-lg block md:inline text-base-content">{detail.companyName}</span></h3>
                         <p className="text-base-content/70 text-sm md:text-base mt-1">{detail.startDate} <span className="font-semibold text-2xl">-</span> {detail.endDate}</p>
                     </div>
                 </div>

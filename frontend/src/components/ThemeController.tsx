@@ -5,11 +5,12 @@ import { useState, useEffect} from "react";
 
 // All available daisyUI themes
 const allThemes = [
-  "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", 
-  "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", 
-  "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", 
-  "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter",
-  "dim", "nord", "sunset"
+  "light", "dark", 
+  "acid", "aqua", "autumn", "black", "business", "bumblebee", "coffee", 
+  "corporate", "cupcake", "cyberpunk", "dim", "dracula", "emerald", 
+  "fantasy", "forest", "garden", "halloween", "lemonade", "lofi", 
+  "luxury", "night", "nord", "pastel", "retro", "sunset", "synthwave", 
+  "valentine", "wireframe", "winter"
 ];
 
 // Define the type for the themeColors
@@ -21,38 +22,36 @@ type ThemeColorMap = {
 const themeColors: ThemeColorMap = {
   light: ["#ffffff", "#d1d5db", "#570df8"],
   dark: ["#2a303c", "#374151", "#661ae6"],
-  cupcake: ["#faf7f5", "#efeae6", "#ef9fbc"],
-  bumblebee: ["#ffffff", "#f8e8a0", "#e0a82e"],
-  emerald: ["#ffffff", "#c3ddcb", "#66cc8a"],
-  corporate: ["#ffffff", "#9ca3af", "#4b6bfb"],
-  synthwave: ["#2d1b69", "#e779c1", "#ff7edb"],
-  retro: ["#e4d8b4", "#e9e7dc", "#6b7b6e"],
-  cyberpunk: ["#ffee00", "#ff7598", "#75d1f0"],
-  valentine: ["#f0d6e8", "#f0b6d3", "#e96d8a"],
-  halloween: ["#212121", "#f28c18", "#6d3a9c"],
-  garden: ["#e9e7dc", "#d5d0ba", "#5c7f67"],
-  forest: ["#171212", "#372f21", "#5a7d5a"],
-  aqua: ["#13b5ea", "#b8e3f3", "#99d4e9"],
-  lofi: ["#f5f5f5", "#dcdcdc", "#1a1919"],
-  pastel: ["#fbfbfb", "#fdd6e5", "#b6dbef"],
-  fantasy: ["#ffe799", "#d8b4fe", "#fda4af"],
-  wireframe: ["#ffffff", "#b8b8b8", "#374151"],
-  black: ["#000000", "#333333", "#ffffff"],
-  luxury: ["#170b09", "#463f3a", "#ddbea9"],
-  dracula: ["#282a36", "#44475a", "#bd93f9"],
-  cmyk: ["#ffffff", "#45caff", "#ff7edb"],
-  autumn: ["#f8f2e4", "#cc9c80", "#8c5e33"],
-  business: ["#ffffff", "#d7dde4", "#1c4f82"],
   acid: ["#ffff00", "#00ffff", "#ff00ff"],
-  lemonade: ["#ffffff", "#fff1c3", "#94c120"],
-  night: ["#0f172a", "#1e293b", "#38bdf8"],
+  aqua: ["#13b5ea", "#b8e3f3", "#99d4e9"],
+  autumn: ["#f8f2e4", "#cc9c80", "#8c5e33"],
+  black: ["#000000", "#333333", "#ffffff"],
+  business: ["#ffffff", "#d7dde4", "#1c4f82"],
+  bumblebee: ["#ffffff", "#f8e8a0", "#e0a82e"],
   coffee: ["#20161f", "#463636", "#a37a5c"],
-  winter: ["#e1f3fd", "#b0daf5", "#81b9dc"],
+  corporate: ["#ffffff", "#9ca3af", "#4b6bfb"],
+  cupcake: ["#faf7f5", "#efeae6", "#ef9fbc"],
+  cyberpunk: ["#ffee00", "#ff7598", "#75d1f0"],
   dim: ["#2d3250", "#424868", "#d941e2"],
+  dracula: ["#282a36", "#44475a", "#bd93f9"],
+  emerald: ["#ffffff", "#c3ddcb", "#66cc8a"],
+  fantasy: ["#ffe799", "#d8b4fe", "#fda4af"],
+  forest: ["#171212", "#372f21", "#5a7d5a"],
+  garden: ["#e9e7dc", "#d5d0ba", "#5c7f67"],
+  halloween: ["#212121", "#f28c18", "#6d3a9c"],
+  lemonade: ["#ffffff", "#fff1c3", "#94c120"],
+  lofi: ["#f5f5f5", "#dcdcdc", "#1a1919"],
+  luxury: ["#170b09", "#463f3a", "#ddbea9"],
+  night: ["#0f172a", "#1e293b", "#38bdf8"],
   nord: ["#eceff4", "#e5e9f0", "#5e81ac"],
-  sunset: ["#fde68a", "#fee3be", "#f43f5e"]
+  pastel: ["#fbfbfb", "#fdd6e5", "#b6dbef"],
+  retro: ["#e4d8b4", "#e9e7dc", "#6b7b6e"],
+  sunset: ["#fde68a", "#fee3be", "#f43f5e"],
+  synthwave: ["#2d1b69", "#e779c1", "#ff7edb"],
+  valentine: ["#f0d6e8", "#f0b6d3", "#e96d8a"],
+  wireframe: ["#ffffff", "#b8b8b8", "#374151"],
+  winter: ["#e1f3fd", "#b0daf5", "#81b9dc"]
 };
-
 // Ensure we have fallback colors for any theme that might be missing
 const defaultColors = ["#cccccc", "#aaaaaa", "#888888"];
 

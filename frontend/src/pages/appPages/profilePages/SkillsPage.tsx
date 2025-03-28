@@ -3,6 +3,7 @@ import SkillCard from "../../../components/SkillCard";
 import { toast, Bounce } from 'react-toastify';
 import axios from "axios"
 import {useState, useEffect} from "react"
+//import {Link} from "react-router-dom"
 
 interface Skills {
     name: string;
@@ -17,12 +18,40 @@ interface Skills {
 export default function SkillsPage() {
     const email = localStorage.getItem('email');
     const [skills, setSkills] = useState<Skills[]>([]);
+    const [searchItem, setSearchItem] = useState('')
+    const [filteredSkills, setfilteredSkills] = useState(skills)
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
+        const searchTerm = e.target.value;
+        setSearchItem(searchTerm)
+        const filteredItems = skills.filter((skill) =>
+            skill.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        
+        setfilteredSkills(filteredItems);
+    }
+
+    function filterByProficiency(proficiency: string) {
+        const filteredItems = skills.filter((skill) =>
+            skill.proficiency === proficiency
+            );
+        //console.log()
+        setfilteredSkills(filteredItems);
+    }
+    
+    function filterByType(type: string) {
+        const filteredItems = skills.filter((skill) =>
+            skill.type === type
+            );
+        setfilteredSkills(filteredItems);
+    }
 
     useEffect(() => {
         async function fetchSkills() {
             try {
                 const response = await axios.post(`/api/profile/skills/getAllSkills`, {email})
                 setSkills(response.data);
+                setfilteredSkills(response.data);
             } catch (err) {
                 toast.error("Failed to load skills", {
                     position: "top-center",
@@ -96,10 +125,12 @@ export default function SkillsPage() {
     }
 
     function getSkillList(category: string) {
-        return skills
-            .filter(skill => skill.skill_category === category)
-            .map(skill => <SkillCard key={skill.skill_id} detail={skill} />);
-
+        // I'm using filtered skills because the default value is equal to skills, when i start filtering, i want the filtered list to change but not the actual skill list
+        return {skills: filteredSkills
+                    .filter(skill => skill.skill_category === category)
+                    .map(skill => <SkillCard key={skill.skill_id} detail={skill} />),
+                categoryName: category
+        }
     }
 
     const technicalSkills = getSkillList("Technical Skills")
@@ -107,25 +138,24 @@ export default function SkillsPage() {
     const businessSkills = getSkillList("Business & Management")
     const creativeSkills = getSkillList("Creative Skills")
     const languageSkills = getSkillList("Languages")
-    const physicalSkills = getSkillList("Physical And Wellness")
+    const physicalSkills = getSkillList("Physical & Wellness")
     const culinarySkills = getSkillList("Culinary Skills")
-    const musicSkills = getSkillList("Music And Performance")
+    const musicSkills = getSkillList("Music & Performance")
     const outdoorSkills = getSkillList("Outdoor & Adventure")
     const softSkills = getSkillList("Soft Skills")
 
     const sectionList = [technicalSkills, designSkills, businessSkills, creativeSkills, languageSkills, physicalSkills, culinarySkills, musicSkills, outdoorSkills, softSkills]
-    const categoryNames = ["Technical Skills", "Design Skills", "Business & Management", "Creative Skills", "Languages", "Physical And Wellness", "Culinary Skills", "Music And Performance", "Outdoor & Adventure", "Soft Skills"]
 
     const section = sectionList
-                    .filter(sectionCategory => sectionCategory.length > 0)
-                    .map((sectionCategory, index) => (
-                        <div className="flex flex-col gap-2" key={index}>
-                            <h1 className="self-start text-lg font-bold">{categoryNames[index]}</h1>
-                            <div className="w-full flex gap-2.5 overflow-auto">
-                                {sectionCategory}
-                            </div>
+                .filter(section => section.skills.length > 0)
+                .map((section) => (
+                    <div className="flex flex-col gap-2" key={section.categoryName}>
+                        <h1 className="self-start text-2xl font-bold text-primary">{section.categoryName}</h1>
+                        <div className="w-full flex gap-2.5 overflow-auto p-2">
+                            {section.skills}
                         </div>
-                    ));
+                    </div>
+                ));
 
     return (
         <AppSideBar>
@@ -135,7 +165,12 @@ export default function SkillsPage() {
                         <div className="flex gap-2 items-center w-full lg:w-3/5">
                             <label className="input w-5/7 ">
                                 <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></g></svg>
-                                <input type="search" required placeholder="Search"/>
+                                <input
+                                    type="search"
+                                    value={searchItem}
+                                    onChange={handleInputChange}
+                                    placeholder='Search'
+                                />
                             </label>
                             <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
                                 const modal = document.getElementById('add_skill-modal');
@@ -164,10 +199,10 @@ export default function SkillsPage() {
                                             <option value="Business & Management">Business & Management</option>
                                             <option value="Creative Skills">Creative Skills</option>
                                             <option value="Languages">Languages</option>
-                                            <option value="Physical And Wellness">Physical & Wellness</option>
+                                            <option value="Physical & Wellness">Physical & Wellness</option>
                                             <option value="Culinary Skills">Culinary Skills</option>
-                                            <option value="Music And Performance">Music & Performance</option>
-                                            <option value="Outdoor And Adventure">Outdoor & Adventure</option>
+                                            <option value="Music & Performance">Music & Performance</option>
+                                            <option value="Outdoor & Adventure">Outdoor & Adventure</option>
                                             <option value="Soft Skills">Soft Skills</option>
                                         </select>
 
@@ -255,15 +290,17 @@ export default function SkillsPage() {
                             </dialog>
                         </div>
                         <div className="flex gap-2 items-center overflow-auto px-2 py-1 lg:w-3/5">
-                            <button className="btn btn-neutral btn-md">All</button>
-                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm">Beginner</button>
-                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm">Intermediate</button>
-                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm">Advanced</button>
-                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm">Expert</button>
+                            <button className="btn btn-neutral btn-md" onClick={() => setfilteredSkills(skills)}>All</button>
+                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("beginner")}>Beginner</button>
+                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("intermediate")}>Intermediate</button>
+                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("advanced")}>Advanced</button>
+                            <button className="btn btn-secondary focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByProficiency("expert")}>Expert</button>
+                            <button className="btn btn-accent focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByType("hobby")}>Hobby</button>
+                            <button className="btn btn-accent focus:outline-2 focus:outline-offset-3 btn-sm" onClick={() => filterByType("professional")}>Professional</button>
                         </div>
                     </div>
                     <hr />
-                    {section? section : <h1 className="text-4xl">No Skills added</h1>}
+                    {section.length > 0? section : <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">No Skills Found</h1>}
                 </div>
             </div>
         </AppSideBar>

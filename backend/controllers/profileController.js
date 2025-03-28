@@ -154,7 +154,6 @@ export const updateWorkExperience = async (req, res) => {
 export const sendFeedback = async (req, res) => {
     try {
         const { email, subject, message } = req.body;
-        console.log(process.env.MY_EMAIL)
         sendEmail({
             myEmail: process.env.MY_EMAIL,
             subject,

@@ -1,3 +1,12 @@
+import { 
+    BookOpen, 
+    Briefcase, 
+    Star, 
+    Calendar, 
+    Edit2, 
+    Trash2 
+} from 'lucide-react';
+
 interface Skills {
     name: string;
     years_of_experience: number;
@@ -10,17 +19,61 @@ interface Skills {
 }
 
 export default function SkillCard({ detail }: { detail: Skills }) {
+    const getProficiencyDetails = () => {
+        switch(detail.proficiency.toLowerCase()) {
+            case 'beginner':
+                return { color: 'text-blue-500', icon: '🌱' };
+            case 'intermediate':
+                return { color: 'text-green-500', icon: '🌿' };
+            case 'advanced':
+                return { color: 'text-purple-500', icon: '🌳' };
+            case 'expert':
+                return { color: 'text-orange-500', icon: '🏆' };
+            default:
+                return { color: 'text-gray-500', icon: '❓' };
+        }
+    };
+
+    const proficiencyDetails = getProficiencyDetails();
+
     return (
-        <div className="flex flex-col rounded-2xl justify-center items-center gap-2 bg-base-100 p-3 shadow-2xl border-2 border-primary/20 hover:border-primary/80 transition-all duration-300">
-            <h2 className="text-lg capitalize font-semibold">{detail.name}</h2>
-            <div className="flex gap-1 items-center">
-                <div className="badge badge-primary capitalize">{detail.type}</div> <div className="badge badge-primary h-1 max-w-0.1"></div> <div className="badge badge-primary capitalize">{detail.proficiency}</div>
+        <div className="flex flex-col rounded-2xl justify-center items-center gap-2 bg-base-100 p-5 shadow-2xl border-2 border-primary/20 hover:border-primary/80 transition-all duration-300">
+            <h2 className="text-xl text-center capitalize font-bold w-full">{detail.name}</h2>
+            <div className="space-y-3 mt-1 w-full">
+                <div className="flex items-center gap-2 text-content">
+                    <Briefcase className="w-4 h-4 text-secondary" />
+                    <span className="capitalize text-base">{detail.type} Skill</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Star className={`w-4 h-4 ${proficiencyDetails.color}`} />
+                    <span className={`capitalize text-base ${proficiencyDetails.color}`}>
+                        {detail.proficiency} Level
+                    </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-secondary" />
+                    <span className="text-base">
+                        {detail.years_of_experience} {detail.years_of_experience === 1 ? 'year' : 'years'} of experience
+                    </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-secondary" />
+                    <span className="text-base">
+                        Added {new Date(detail.created_at).toLocaleDateString()}
+                    </span>
+                </div>
             </div>
-            <p className="badge badge-neutral">Years of exp: {detail.years_of_experience}</p>
-            <p>Added {detail.created_at.split("T")[0]}</p>
-            <div className="flex w-full justify-between">
-                <button className="btn btn-info">Edit</button>
-                <button className="btn btn-error ml-1.5">Remove</button>
+            
+            <div className="mt-2 text-md font-medium text-secondary-content w-full bg-secondary/50 p-4 italic">
+                "{detail.description? detail.description : "NO description provided by user"}"
+            </div>          
+
+            <div className="flex w-full justify-between mt-2">
+                <button className="btn btn-info"><Edit2 className="w-4 h-4" /> Edit</button>
+                <button className="btn btn-error ml-1.5"><Trash2 className="w-4 h-4" /> Remove</button>
             </div>
         </div>
     )
