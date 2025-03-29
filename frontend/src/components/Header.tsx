@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import logo from "../assets/no_bg_logo.png"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import avatar from "../assets/avatar.webp"
 
 export default function Header() {
   //TODO: for header background, consider changing the background to bg-gradient-to-r from-primary to-secondary, after making the whole app
@@ -14,7 +15,6 @@ export default function Header() {
     };
     fetchProfileImage()
   }, [])
-
   return (
     <header 
       style={{ fontFamily: "Inter" }} 
@@ -27,7 +27,11 @@ export default function Header() {
             src={profileImage} 
             alt="profile settings" 
             className="size-15 md:size-17 lg:hidden object-cover rounded-full"
-          /> : <div className="skeleton object-cover rounded-full"></div>}
+          /> : <img 
+          src={avatar} 
+          alt="profile settings" 
+          className="size-15 md:size-17 lg:hidden object-cover rounded-full"
+        />}
         </Link>
         <Link to="/">
           <img src={logo} alt="FocusFlow logo" className="size-22 hidden lg:block xl:active:size-24 xl:active:animate-bounce xl:active:translate-x-150 duration-3000"/>
@@ -45,7 +49,11 @@ export default function Header() {
               src={profileImage} 
               alt="profile settings"
               className="size-15 lg:size-20 object-cover rounded-full"
-            /> : <div className="skeleton object-cover rounded-full"></div>}
+            /> : <img 
+            src={avatar} 
+            alt="profile settings"
+            className="size-15 lg:size-20 object-cover rounded-full"
+          />}
         </Link>
       </nav>
     </header>

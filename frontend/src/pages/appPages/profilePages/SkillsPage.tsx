@@ -2,7 +2,7 @@ import AppSideBar from "../../../components/ProfileSideBar";
 import SkillCard from "../../../components/SkillCard";
 import { toast, Bounce } from 'react-toastify';
 import axios from "axios"
-import {useState, useEffect} from "react"
+import {useState, useEffect, useRef} from "react"
 
 interface Skills {
     name: string;
@@ -20,6 +20,11 @@ export default function SkillsPage() {
     const [searchItem, setSearchItem] = useState('')
     const [filteredSkills, setFilteredSkills] = useState(skills)
     const [render, forceReRender] = useState(0); // page wasn't rerendering when skill state was changed
+    const skillPage = useRef(null)
+
+    if (skillPage.current) {
+        (skillPage.current as HTMLElement).scrollIntoView()
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
         const searchTerm = e.target.value;
@@ -84,15 +89,16 @@ export default function SkillsPage() {
         (document.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = "";
         const modal = document.getElementById('skill-modal');
         if (modal) {
+            modal.removeAttribute('data-experience-detail');
             (modal as HTMLDialogElement).show();
         }
     }
     
     async function handleSkill(formData: FormData) {
         try {
-            const skillModalOpen = document.getElementById('skill-modal');
-            if (skillModalOpen) {
-                (skillModalOpen as HTMLDialogElement).close();
+            const userSkillModal = document.getElementById('skill-modal');
+            if (userSkillModal) {
+                (userSkillModal as HTMLDialogElement).close();
             }
             const skillName = formData.get("skill_name")
             const yearsOfExperience = formData.get("years_of_experience")
@@ -102,12 +108,10 @@ export default function SkillsPage() {
             const proficiency = formData.get("proficiency")
             const description = formData.get("description")
     
-            const modal = document.getElementById('edit-modal');
-            const existingDetailStr = modal?.getAttribute('data-experience-detail');
-            
+            const existingDetailStr = userSkillModal?.getAttribute('data-experience-detail');
             if (existingDetailStr) {
                 const existingDetail = JSON.parse(existingDetailStr);
-                const skillUpdateResponse = await axios.put(`/api/profile/skills/updateSkill/${existingDetail.experience_id}`, {
+                const skillUpdateResponse = await axios.put(`/api/profile/skills/updateSkill/${existingDetail.skill_id}`, {
                     skillName,
                     yearsOfExperienceInt,
                     type,
@@ -115,7 +119,6 @@ export default function SkillsPage() {
                     proficiency,
                     description
                 });
-                console.log(skillUpdateResponse.data )
     
                 setSkills(prev => 
                     prev.map(skill => 
@@ -249,8 +252,9 @@ export default function SkillsPage() {
     const musicSkills = getSkillList("Music & Performance")
     const outdoorSkills = getSkillList("Outdoor & Adventure")
     const softSkills = getSkillList("Soft Skills")
+    const otherSkills = getSkillList("Other")
 
-    const sectionList = [technicalSkills, designSkills, businessSkills, creativeSkills, languageSkills, physicalSkills, culinarySkills, musicSkills, outdoorSkills, softSkills]
+    const sectionList = [technicalSkills, designSkills, businessSkills, creativeSkills, languageSkills, physicalSkills, culinarySkills, musicSkills, outdoorSkills, softSkills, otherSkills]
 
     const section = sectionList
                 .filter(section => section.skills.length > 0)
@@ -266,7 +270,7 @@ export default function SkillsPage() {
             
     return (
         <AppSideBar>
-            <div className="w-full p-7">
+            <div ref={skillPage} className="w-full p-7">
                 <div className="w-full border-2 p-7 flex flex-col gap-4">
                     <div className="flex flex-col gap-3 lg:flex-row">
                         <div className="flex gap-2 items-center w-full lg:w-3/5">
@@ -306,6 +310,7 @@ export default function SkillsPage() {
                                             <option value="Music & Performance">Music & Performance</option>
                                             <option value="Outdoor & Adventure">Outdoor & Adventure</option>
                                             <option value="Soft Skills">Soft Skills</option>
+                                            <option value="Other">Other</option>
                                         </select>
 
                                         <fieldset className="fieldset flex gap-5">

@@ -34,8 +34,8 @@ const initDB = async () => {
                 title VARCHAR(255) NOT NULL,
                 company VARCHAR(255) NOT NULL,
                 experience_category VARCHAR(50) NOT NULL,
-                start_date VARCHAR(10) NOT NULL,
-                end_date VARCHAR(10),
+                start_date DATE NOT NULL,
+                end_date DATE,
                 description TEXT
             )`;
 

@@ -1,4 +1,4 @@
-import { useEffect, useState} from "react"
+import { useEffect, useState, useRef} from "react"
 import axios from "axios"
 import AppSideBar from "../../../components/ProfileSideBar";
 import { FaInfo } from "react-icons/fa";
@@ -6,6 +6,7 @@ import { toast, Bounce } from 'react-toastify';
 import WorkExperience from "../../../components/WorkExperience";
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
+import avatar from '../../../assets/avatar.webp'
 
 interface UserProfile {
     username: string,
@@ -44,6 +45,11 @@ export default function ProfilePage() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [value, setValue] = useState<string | undefined>()
+    const profilePage = useRef(null);
+
+    if (profilePage.current) {
+        (profilePage.current as HTMLElement).scrollIntoView();
+    }
 
     useEffect(() => {
         async function getUserData() {
@@ -51,7 +57,9 @@ export default function ProfilePage() {
                 try {
                     const response = await axios.post("/api/profile/userData", { email });
                     setUserProfile(response.data.profile);
-                    setWorkExperience(response.data.work_experience);
+                    // the sort is to make sure that the work experience is arranged based of the latest work experience
+                    setWorkExperience(response.data.work_experience
+                        .sort((a: WorkExperienceItem, b: WorkExperienceItem) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime()));
                 } catch (error) {
                     console.error(error);
                 }
@@ -78,7 +86,6 @@ export default function ProfilePage() {
             const lastName = formData.get("last_name")
             let phoneNumber = formData.get("number")
             
-            console.log(image)
             if (image instanceof File && image.name.length > 0) {
                 const urlResponse = await axios.get("/api/profile/profileUrl")
                 const uploadUrl = urlResponse.data.profile_image_url;
@@ -141,12 +148,13 @@ export default function ProfilePage() {
         // clearing the input field
         (document.querySelector('input[name="title"]') as HTMLInputElement).value = "";
         (document.querySelector('input[name="company"]') as HTMLInputElement).value = "";
-        (document.querySelector('input[name="start_date"]') as HTMLInputElement).value = "";
-        (document.querySelector('input[name="end_date"]') as HTMLInputElement).value = "";
+        setStartDate('');
+        setEndDate('');
         (document.querySelector('select[name="experience_category"]') as HTMLSelectElement).value = "";
         (document.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = "";
         const modal = document.getElementById('work_experience-modal');
         if (modal) {
+            modal.removeAttribute('data-experience-detail');
             (modal as HTMLDialogElement).show();
         }
     }
@@ -205,7 +213,7 @@ export default function ProfilePage() {
             }
     
         } catch (err) {
-            toast.error(`Error updating experience, please try again later`, {
+            toast.error(`Server error, please try again later`, {
                 position: "top-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -262,14 +270,16 @@ export default function ProfilePage() {
         const modal = document.getElementById('work_experience-modal');
         if (modal) {
             modal.setAttribute('data-experience-detail', JSON.stringify(detail));
+            const formattedStartDate = detail.start_date ? new Date(detail.start_date).toISOString().split('T')[0] : '';
+            const formattedEndDate = detail.end_date ? new Date(detail.end_date).toISOString().split('T')[0] : '';
             
+            setStartDate(formattedStartDate);
+            setEndDate(formattedEndDate);
             const form = modal.querySelector('form') as HTMLFormElement;
             
             if (form) {
                 (form.querySelector('input[name="title"]') as HTMLInputElement).value = detail.title;
                 (form.querySelector('input[name="company"]') as HTMLInputElement).value = detail.company;
-                (form.querySelector('input[name="start_date"]') as HTMLInputElement).value = detail.start_date;
-                (form.querySelector('input[name="end_date"]') as HTMLInputElement).value = detail.end_date || '';
                 (form.querySelector('select[name="experience_category"]') as HTMLSelectElement).value = detail.experience_category;
                 (form.querySelector('textarea[name="description"]') as HTMLTextAreaElement).value = detail.description;
             }
@@ -294,7 +304,7 @@ export default function ProfilePage() {
 
     return (
         <AppSideBar>
-            <div className="flex items-center justify-center flex-col gap-5 w-full p-4 md:p-7 xl:py-8 xl:px-10">
+            <div ref={profilePage} className="flex items-center justify-center flex-col gap-5 w-full p-4 md:p-7 xl:py-8 xl:px-10">
                 <div className="flex justify-between items-center border-2 px-5 py-7 mt-5 flex-col gap-4 w-full">
                     <div className="flex justify-between w-full">
 
@@ -307,7 +317,10 @@ export default function ProfilePage() {
                                             {userProfile.profile_image_url && userProfile.profile_image_url.length > 0 ? <img 
                                                 src={userProfile.profile_image_url} 
                                                 alt="Profile" 
-                                            /> : <div className="skeleton object-cover rounded-full"></div>}
+                                            /> : <img 
+                                            src={avatar} 
+                                            alt="Profile" 
+                                        />}
                                         </div>
                                     </div>
                                     <div className="ml-4 self-center">

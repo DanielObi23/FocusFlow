@@ -47,10 +47,7 @@ export const getAllSkills = async (req, res) => {
 }
 
 export const deleteSkill = async (req, res) => {
-    console.log(1)
     try {
-        console.log(2)
-        console.log(req.params.id)
         const skill = await sql`
             DELETE FROM skills WHERE skill_id = ${req.params.id} RETURNING *`
         res.status(200).json(skill)
@@ -70,10 +67,9 @@ export const updateSkill = async (req, res) => {
             proficiency,
             description,
         } = req.body;
-
         const skill = await sql`
             UPDATE 
-                work_experience 
+                skills 
             SET 
                 name = ${skillName}, 
                 years_of_experience = ${yearsOfExperienceInt}, 

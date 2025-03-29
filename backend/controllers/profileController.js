@@ -39,7 +39,6 @@ export const uploadProfileImage = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        console.log("1")
         const {
             email,
             firstName,
@@ -98,15 +97,10 @@ export const addWorkExperience = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
         const {user_id} = user[0];
-        const start_date_obj = new Date(req.body.startDate)
-        const start_date = `${start_date_obj.getMonth()}/${start_date_obj.getFullYear()}`
-        const end_date_obj = new Date(req.body.endDate)
-        const end_date = `${end_date_obj.getMonth()}/${end_date_obj.getFullYear()}`
-
         const workExperience = await sql`
             INSERT INTO work_experience 
             (user_id, title, company, experience_category, start_date, end_date, description)
-            VALUES (${user_id}, ${req.body.title}, ${req.body.company}, ${req.body.experienceCategory}, ${start_date}, ${end_date}, ${req.body.description}) RETURNING *
+            VALUES (${user_id}, ${req.body.title}, ${req.body.company}, ${req.body.experienceCategory}, ${req.body.startDate}, ${req.body.endDate}, ${req.body.description}) RETURNING *
         `;
 
         res.status(201).json(workExperience[0])
@@ -120,7 +114,6 @@ export const deleteWorkExperience = async (req, res) => {
     try {
         await sql`
             DELETE FROM work_experience WHERE experience_id = ${req.params.id}`
-            console.log("deleted")
         res.status(200).json({message: "deletion successful"})
     } catch (err) {
         console.error(err);
