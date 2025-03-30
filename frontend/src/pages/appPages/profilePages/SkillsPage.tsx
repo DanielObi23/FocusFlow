@@ -24,9 +24,11 @@ export default function SkillsPage() {
     const [loading, setLoading] = useState(true);
     const skillPage = useRef(null)
 
-    if (skillPage.current) {
-        (skillPage.current as HTMLElement).scrollIntoView({ behavior: 'smooth' })
-    }
+    useEffect(() => {
+        if (skillPage.current) {
+            (skillPage.current as HTMLElement).scrollIntoView({ behavior: 'smooth' })
+        }
+      }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
         const searchTerm = e.target.value;

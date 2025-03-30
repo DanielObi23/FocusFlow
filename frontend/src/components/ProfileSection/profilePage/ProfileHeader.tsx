@@ -15,7 +15,12 @@ interface UserProfile {
     last_name: string | null,
     phone_number: string | null,
 }
-export default function ProfileHeader() {
+
+type email = {
+    email: string | null
+}
+
+export default function ProfileHeader({email}: email) {
     const [userProfile, setUserProfile] = useState<UserProfile>({
         username: "",
         email: "",
@@ -25,9 +30,7 @@ export default function ProfileHeader() {
         last_name: null,
         phone_number: null
     })
-    const email = localStorage.getItem("email");
     const [value, setValue] = useState<string | undefined>()
-
     useEffect(() => {
         async function getUserData() {
             if (email) {

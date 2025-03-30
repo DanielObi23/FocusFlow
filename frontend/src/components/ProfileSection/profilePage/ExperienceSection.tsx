@@ -14,8 +14,11 @@ interface WorkExperienceItem {
     description: string
 }
 
-export default function ExperienceSection() {
-    const email = localStorage.getItem("email");
+type email = {
+    email: string | null
+}
+
+export default function ExperienceSection({email}: email) {
 
     const [workExperience, setWorkExperience] = useState<WorkExperienceItem[]>([])
 
