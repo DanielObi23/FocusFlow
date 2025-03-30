@@ -1,6 +1,7 @@
-import AppSideBar from "../../../components/ProfileSideBar";
-import SkillCard from "../../../components/SkillCard";
-import { toast, Bounce } from 'react-toastify';
+import AppSideBar from "../../../components/ProfileSection/ProfileSideBar";
+import SkillCard from "../../../components/ProfileSection/skillsPage/SkillCard";
+import toast from "../../../utils/toast";
+
 import axios from "axios"
 import {useState, useEffect, useRef} from "react"
 
@@ -20,10 +21,11 @@ export default function SkillsPage() {
     const [searchItem, setSearchItem] = useState('')
     const [filteredSkills, setFilteredSkills] = useState(skills)
     const [render, forceReRender] = useState(0); // page wasn't rerendering when skill state was changed
+    const [loading, setLoading] = useState(true);
     const skillPage = useRef(null)
 
     if (skillPage.current) {
-        (skillPage.current as HTMLElement).scrollIntoView()
+        (skillPage.current as HTMLElement).scrollIntoView({ behavior: 'smooth' })
     }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
@@ -56,18 +58,9 @@ export default function SkillsPage() {
                 const response = await axios.post(`/api/profile/skills/getAllSkills`, {email})
                 setSkills(response.data);
                 setFilteredSkills(response.data);
+                setLoading(false);
             } catch (err) {
-                toast.error("Failed to load skills", {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+                toast({type: 'error', message: "Failed to load skills"})
             }
         }
         fetchSkills();
@@ -141,6 +134,7 @@ export default function SkillsPage() {
     
                 setSkills([...skills, response.data]);
                 forceReRender(prev => prev + 1);
+                toast({type:'success', message: "Skill added successfully"})
             }
     
             const skillModal = document.getElementById('skill-modal');
@@ -149,17 +143,7 @@ export default function SkillsPage() {
             }
     
         } catch (err) {
-            toast.error(`Error updating experience, please try again later`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
+            toast({type: 'error', message: "Error updating experience, please try again later"});
             console.error(err);
         }
     }
@@ -212,17 +196,7 @@ export default function SkillsPage() {
             forceReRender(prev => prev + 1);
             (modal as HTMLDialogElement).close();
         } catch (err) {
-            toast.error(`Error deleting experience, please try again later`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
+            toast({type: 'error', message: "Error deleting experience, please try again later"});
             console.error(err);
         }
     }
@@ -406,7 +380,9 @@ export default function SkillsPage() {
                         </div>
                     </div>
                     <hr />
-                    {section.length > 0? section : <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">No Skill Found</h1>}
+                    {loading?
+                        <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">Searching For Skills</h1> :
+                        (section.length > 0? section : <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">No Skill Found</h1>)}
                 </div>
                 <dialog id="delete-modal" className="modal">
                     <div className="modal-box w-full">

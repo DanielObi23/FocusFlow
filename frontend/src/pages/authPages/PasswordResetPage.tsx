@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../utils/toast";
 import axios from "axios";
 
 export default function PasswordResetPage() {
@@ -24,46 +24,26 @@ export default function PasswordResetPage() {
     }
   }, [errorMessage]);
   // checking if token is valid, if not sending the user back to forgot password page
-    async function verifyToken() {
-        console.log("about to verify token")
-        try {
-            console.log(token)
-            const response = await axios.patch(`/api/auth/reset-password`, { token });
-            console.log(response.data)
-            const message = response.data.message
-            console.log(message);
-            if (message === "Token is valid") {
-                console.log("verified")
-                return;
-            } else {
-                toast.error(`Link has expired, request new link`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
-                navigate("/forgotPassword")
-            }
-        } catch (error) {
-            toast.error(`Server Error, please request new link`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
-            navigate("/forgotPassword")
-        }
-    }
+  async function verifyToken() {
+      console.log("about to verify token")
+      try {
+          console.log(token)
+          const response = await axios.patch(`/api/auth/reset-password`, { token });
+          console.log(response.data)
+          const message = response.data.message
+          console.log(message);
+          if (message === "Token is valid") {
+              console.log("verified")
+              return;
+          } else {
+            toast({type: 'error', message: "Link has expired, request new link"});
+              navigate("/forgotPassword")
+          }
+      } catch (error) {
+        toast({type: 'error', message: "Server Error, please request new link"});
+          navigate("/forgotPassword")
+      }
+  }
 
     useEffect(() => {
         verifyToken();
@@ -96,30 +76,10 @@ export default function PasswordResetPage() {
       }
 
       if (response.data.message === "success") {
-        toast.success(`Password reset was succesful`, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          transition: Bounce,
-        });
+        toast({type: 'success', message: "Password reset was succesful, please login"})
         navigate("/login")
       } else {
-        toast.error("Server error, please request new link or try again later", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          transition: Bounce,
-        });
+        toast({type: 'error', message: "Server error, please request new link or try again later"});
         navigate("/login")
       }
     } catch (error) {

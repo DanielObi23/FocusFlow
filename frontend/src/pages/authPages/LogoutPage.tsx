@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../utils/toast";
 import TruckLoader from "../../components/TruckLoader"
 const Logout: React.FC = () => {
   const { logout } = useAuth();
@@ -10,17 +10,7 @@ const Logout: React.FC = () => {
   useEffect(() => {
     const handleLogout = async () => {
       await logout();
-      toast.success(`Successfully logged out`, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        transition: Bounce,
-      });
+      toast({type: 'success', message: "Successfully logged out"});
       localStorage.removeItem("email")
       navigate('/login', { state: { fromLogout: true } });
     };

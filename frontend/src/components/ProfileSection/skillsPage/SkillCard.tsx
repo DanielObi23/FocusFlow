@@ -22,15 +22,15 @@ export default function SkillCard({ detail, deleteSkill: handleDeleteSkill, hand
     const getProficiencyDetails = () => {
         switch(detail.proficiency.toLowerCase()) {
             case 'beginner':
-                return { color: 'text-blue-500', icon: '🌱' };
+                return { color: 'text-blue-500'};
             case 'intermediate':
-                return { color: 'text-green-500', icon: '🌿' };
+                return { color: 'text-green-500'};
             case 'advanced':
-                return { color: 'text-purple-500', icon: '🌳' };
+                return { color: 'text-purple-500'};
             case 'expert':
-                return { color: 'text-orange-500', icon: '🏆' };
+                return { color: 'text-orange-500'};
             default:
-                return { color: 'text-gray-500', icon: '❓' };
+                return { color: 'text-gray-500'};
         }
     };
 
@@ -69,7 +69,7 @@ export default function SkillCard({ detail, deleteSkill: handleDeleteSkill, hand
             </div>
             
             <div className="mt-2 text-md font-medium text-secondary-content w-full bg-secondary/50 p-4 italic">
-                "{detail.description? detail.description : "NO description provided by user"}"
+                "{detail.description? detail.description : "No description provided by user"}"
             </div>          
 
             <div className="flex w-full justify-between mt-2">

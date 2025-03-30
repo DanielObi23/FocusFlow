@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../utils/toast";
 import axios from "axios";
 
 export default function RegisterPage() {
@@ -54,30 +54,10 @@ export default function RegisterPage() {
 
       if (response.data.message === "duplicate") {
         setErrorMessage("Email already in use, please try again or login");
-        toast.error(`Email already in use, please try again or login`, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          transition: Bounce,
-        });
+        toast({type: 'error', message: "Email already in use, please try again or login"});
         navigate("/register")
       } else {
-        toast.info("Please verify email", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-          transition: Bounce,
-        });
+        toast({type: 'info', message: "Please verify email"});
         navigate("/verify-email", { state: { email, password, username } });
       }
     } catch (error) {

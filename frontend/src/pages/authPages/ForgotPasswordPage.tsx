@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../utils/toast";
 
 export default function ForgotPasswordPage() {
     const navigate = useNavigate();
@@ -34,18 +34,7 @@ export default function ForgotPasswordPage() {
                 emailRef.current.disabled = false;
                 resendCodeRef.current.disabled = false;
             }
-            toast.success(`Password reset link was sent again, check spam folder also`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
-            
+            toast({type: 'success', message: "Password reset link was sent again, check spam folder also"});
             // Set the timer for 3 minutes (180 seconds)
             setTimeLeft(180);
             setButtonDisabled(true);
@@ -70,43 +59,13 @@ export default function ForgotPasswordPage() {
                 resendCodeRef.current.disabled = false;
             }
             if (message === "Invalid Email") {
-                toast.error(`Invalid Email, please try again`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+                toast({type: 'error', message: "Invalid Email, please try again"});
                 navigate("/forgot-password");
             } else if (message === "Email sent") {
-                toast.success(`Reset link sent, please check you inbox`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+                toast({type: 'success', message: "Reset link sent, please check you inbox"});
             }
         } catch (err) {
-            toast.error(`Internal server error, please try again in a few minutes`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
+            toast({type: 'error', message: "Internal server error, please try again in a few minutes"});
         }
     }
 

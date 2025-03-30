@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../contexts/AuthContext';
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../utils/toast";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -16,17 +16,7 @@ export default function LoginPage() {
       localStorage.setItem("email", email);
       navigate("/dashboard", {state: {email}});
     } catch (err) {
-      toast.error('Login failed! Please try again', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        transition: Bounce,
-        });
+      toast({type: 'error', message: 'Incorrect password/email! Please try again'})
       console.error(err);
     }
   }

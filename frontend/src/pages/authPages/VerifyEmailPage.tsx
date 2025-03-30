@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../utils/toast";
 
 export default function VerifyEmail() {
     const location = useLocation();
@@ -24,17 +24,7 @@ export default function VerifyEmail() {
     async function resendOTP() {
         try {
             await axios.post("/api/auth/verify-email/", {email: location.state.email});
-            toast.success(`OTP was sent again`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
+            toast({type: 'success', message: "OTP was sent again"});
             
             // Set the timer for 3 minutes (180 seconds)
             setTimeLeft(180);
@@ -60,44 +50,14 @@ export default function VerifyEmail() {
                     password, 
                     username
                 });
-                toast.success(`${username}, registration was successful, please login`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+                toast({type: 'success', message: `${username}, registration was successful, please login`});
                 navigate("/login");
             } else {
-                toast.error(`OTP is invalid or expired`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+                toast({type: 'error', message: "Server error, please try again later"});
                 console.error("Email verification failed");
             }
         } catch (err) {
-            toast.error(`Server error, please try again later`, {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-                transition: Bounce,
-            });
+            toast({type: 'error', message: "Server error, please try again later"});
             console.error(err);
         }
     }

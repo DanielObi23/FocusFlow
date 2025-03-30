@@ -1,9 +1,11 @@
 import express from 'express';
-import { userData, uploadProfileImage, updateProfile, getProfileImage, addWorkExperience, deleteWorkExperience, updateWorkExperience, sendFeedback } from "../controllers/profileController.js"
+import { userProfile, uploadProfileImage, updateProfile, getProfileImage, userExperience, addWorkExperience, deleteWorkExperience, updateWorkExperience, sendFeedback } from "../controllers/profileController.js"
 
 const router = express.Router();
 
-router.post("/userData", userData);
+router.post("/userProfile", userProfile);
+
+router.post("/userExperience", userExperience);
 
 router.get("/profileUrl", uploadProfileImage);
 
