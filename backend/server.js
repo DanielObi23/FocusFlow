@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
 import initDB from "./config/dbInit.js";
+import { aj, ajStrict } from "./lib/arcjet.js"
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,71 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(morgan("dev"));
+
+// applying arcjet rate limiting, shield and bot detection to all routes
+app.use("/api", async (req, res, next) => {
+    try {
+        if (req.path.startsWith("/login") || req.path.startsWith("/auth")) {
+            return next(); // Skip protection for authentication
+        }
+        const decision = await aj.protect(req, {
+            requested: 1 
+        })
+        
+        if (decision.isDenied()) {
+            if(decision.reason && decision.reason.isRateLimit()) {
+                res.status(429).json({ message: "Too many requests, please try again later." });
+            } else if (decision.reason.isBot()) {
+                res.status(403).json({ message: "Bot access denied" });
+            } else {
+                res.status(403).json({ message: "Access denied" });
+            }
+            return;
+        }
+
+        // check for spoofed bots
+        if (decision.results && decision.results.some((result) => result.reason.isBot() && result.reason.isSpoofed())) {
+            res.status(403).json({ message: "Spoofed bot access denied" });
+            return;
+        }
+
+        next();
+    } catch (err) {
+        console.log("Arcjet error", err);
+        next(err)
+    }
+})
+
+// applying arcjet rate limiting, shield and bot detection to all ai routes
+app.use("/api/ai", async (req, res, next) => {
+    try {
+        const decision = await ajStrict.protect(req, {
+            requested: 1 
+        })
+
+        if (decision.isDenied()) {
+            if(decision.reason && decision.reason.isRateLimit()) {
+                res.status(429).json({ message: "Too many ai requests, please try again later." });
+            } else if (decision.reason.isBot()) {
+                res.status(403).json({ message: "Bot access denied" });
+            } else {
+                res.status(403).json({ message: "Access denied" });
+            }
+            return;
+        }
+
+        // check for spoofed bots
+        if (decision.results && decision.results.some((result) => result.reason.isBot() && result.reason.isSpoofed())) {
+            res.status(403).json({ message: "Spoofed bot access denied" });
+            return;
+        }
+
+        next();
+    } catch (err) {
+        console.log("Arcjet error", err);
+        next(err)
+    }
+})
 
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
