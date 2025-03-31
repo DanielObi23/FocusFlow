@@ -20,8 +20,13 @@ const Logout = lazy(() => import('./pages/authPages/LogoutPage'));
   const SkillsPage = lazy(() => import('./pages/appPages/profilePages/SkillsPage'));
   const AchievementPage = lazy(() => import('./pages/appPages/profilePages/AchievementPage'));
   const FeedbackPage = lazy(() => import('./pages/appPages/profilePages/FeedbackPage'));
+
+  // Path Pages
+  const LearningPathsPage = lazy(() => import('./pages/appPages/pathPages/LearningPathsPage'));
+  const ProjectPathsPage = lazy(() => import('./pages/appPages/pathPages/ProjectPathsPage'));
+  const CareerPathsPage = lazy(() => import('./pages/appPages/pathPages/CareerPathsPage'));
+
 const DashboardPage = lazy(() => import('./pages/appPages/DashboardPage'));
-const LearningPathsPage = lazy(() => import('./pages/appPages/PathsLibraryPage'));
 
 // Error Pages
 const NotFoundPage = lazy(() => import('./pages/errorPages/NotFoundPage'));
@@ -57,7 +62,9 @@ function AppLayout() {
           <Route element={<AuthRequired />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/paths" element={<LearningPathsPage />} />
+            <Route path="/path/learning" element={<LearningPathsPage />} />
+            <Route path="/path/project" element={<ProjectPathsPage />} />
+            <Route path="/path/career" element={<CareerPathsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/skills" element={<SkillsPage />} />
             <Route path="/profile/achievements" element={<AchievementPage />} />

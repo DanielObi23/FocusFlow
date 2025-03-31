@@ -1,4 +1,4 @@
-import AppSideBar from "../../../components/ProfileSideBar";
+import AppSideBar from "../../../components/ProfileSection/ProfileSideBar";
 export default function AchievementPage() {
     return (
         <AppSideBar>

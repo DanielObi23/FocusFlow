@@ -1,6 +1,7 @@
-import AppSideBar from "../../../components/ProfileSideBar";
+import AppSideBar from "../../../components/ProfileSection/ProfileSideBar";
 import axios from "axios";
-import { toast, Bounce } from 'react-toastify';
+import toast from "../../../utils/toast";
+
 export default function Feedback() {
     async function handleSubmit(formData: FormData) {
         try {
@@ -14,30 +15,10 @@ export default function Feedback() {
             })
 
             if (response.status === 200) {
-                toast.success('Feedback sent successfully', {
-                    position: "top-center",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+                toast({type:'success', message: "Feedback sent successfully"});
             }
         } catch (err) {
-            toast.error(`Internal server error, please try again in a few minutes`, {
-                    position: "top-center",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                    transition: Bounce,
-                });
+            toast({type:'error', message: "Internal server error, please try again in a few minutes"});
             console.error(err);
         }
     }

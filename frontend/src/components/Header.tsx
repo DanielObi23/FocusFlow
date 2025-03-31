@@ -41,7 +41,7 @@ export default function Header() {
       <nav className="flex items-center gap-15 font-semibold text-lg mt-5 md:text-xl md:me-4">
         <div className="flex gap-10 lg:gap-6">
           <Link to="/dashboard" className="md:focus:outline-2 md:focus:border-b-0 md:focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in md:text-2xl">Dashboard</Link>
-          <Link to="/paths" className="md:focus:outline-2 md:focus:border-b-0 md:focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in md:text-2xl">Paths <span className="hidden xl:inline">Library</span></Link>
+          <Link to="/path/learning" className="md:focus:outline-2 md:focus:border-b-0 md:focus:outline-offset-7 hover:text-accent hover:border-b-2 hover:mx-3 duration-350 ease-in md:text-2xl">Paths <span className="hidden xl:inline">Library</span></Link>
         </div>
         <Link to="/profile" className="lg:ms-5 lg:me-10 hidden lg:block">
           {profileImage ? 

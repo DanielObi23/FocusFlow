@@ -1,6 +1,7 @@
 import arcjet, { tokenBucket, shield, detectBot } from "@arcjet/node";
 import "dotenv/config";
 
+// TODO: token arent being refreshed
 export const aj = arcjet({
     key: process.env.ARCJET_KEY,
     characteristics:["ip.src"],
@@ -16,7 +17,7 @@ export const aj = arcjet({
             mode:"LIVE",
             refillRate: 25,
             interval: 5000,
-            capacity: 50
+            capacity: 2000
         })
     ]
  });
