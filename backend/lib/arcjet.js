@@ -4,7 +4,7 @@ import "dotenv/config";
 // TODO: token arent being refreshed
 export const aj = arcjet({
     key: process.env.ARCJET_KEY,
-    characteristics:["ip.src"],
+    characteristics:["ip.src", "request.method", "request.path"],
     rules: [
         shield({mode:"LIVE"}), //protection from SQL injection, XSS, CSRF attacks
         detectBot({
@@ -17,14 +17,14 @@ export const aj = arcjet({
             mode:"LIVE",
             refillRate: 25,
             interval: 5000,
-            capacity: 2000
+            capacity: 50
         })
     ]
  });
 
 export const ajStrict = arcjet({
     key: process.env.ARCJET_KEY,
-    characteristics:["ip.src"],
+    characteristics:["ip.src", "request.method", "request.path"],
     rules: [
         shield({mode:"LIVE"}), //protection from SQL injection, XSS, CSRF attacks
         detectBot({

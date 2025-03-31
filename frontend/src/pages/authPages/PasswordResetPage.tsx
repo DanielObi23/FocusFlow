@@ -25,15 +25,10 @@ export default function PasswordResetPage() {
   }, [errorMessage]);
   // checking if token is valid, if not sending the user back to forgot password page
   async function verifyToken() {
-      console.log("about to verify token")
       try {
-          console.log(token)
           const response = await axios.patch(`/api/auth/reset-password`, { token });
-          console.log(response.data)
           const message = response.data.message
-          console.log(message);
           if (message === "Token is valid") {
-              console.log("verified")
               return;
           } else {
             toast({type: 'error', message: "Link has expired, request new link"});

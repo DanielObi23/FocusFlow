@@ -1,6 +1,6 @@
-import AppSideBar from "../../../components/ProfileSection/ProfileSideBar";
+import AppSideBar from "../../components/ProfileSection/AppSideBar";
 import axios from "axios";
-import toast from "../../../utils/toast";
+import toast from "../../utils/toast";
 
 export default function Feedback() {
     async function handleSubmit(formData: FormData) {

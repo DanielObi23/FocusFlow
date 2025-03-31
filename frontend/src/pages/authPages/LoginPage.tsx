@@ -14,7 +14,7 @@ export default function LoginPage() {
     try {
       await login({ email, password });
       localStorage.setItem("email", email);
-      navigate("/dashboard", {state: {email}});
+      navigate("/profile", {state: {email}});
     } catch (err) {
       toast({type: 'error', message: 'Incorrect password/email! Please try again'})
       console.error(err);

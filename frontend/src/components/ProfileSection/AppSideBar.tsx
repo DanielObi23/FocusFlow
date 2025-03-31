@@ -25,11 +25,11 @@ interface AppSideBarProps {
                     {/* Sidebar content here */}
                     <li className="my-2 font-bold text-xl"><Link to="/profile">Profile</Link></li>
                     <hr />
-                    <li className="my-2 font-bold text-xl"><Link to="/profile/skills">Skills & Interest</Link></li>
+                    <li className="my-2 font-bold text-xl"><Link to="/skills">Skills & Interest</Link></li>
                     <hr />
-                    <li className="my-2 font-bold text-xl"><Link to="/profile/achievements">Achievements Library</Link></li>
+                    <li className="my-2 font-bold text-xl"><Link to="/learning-paths">Learning Paths</Link></li>
                     <hr />
-                    <li className="my-2 font-bold text-xl"><Link to="/profile/feedback">Feedback</Link></li>
+                    <li className="my-2 font-bold text-xl"><Link to="/feedback">Feedback</Link></li>
                     <hr />
                     <li className="my-2 font-bold text-xl"><ThemeController /></li>
                     <hr />

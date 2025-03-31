@@ -15,18 +15,12 @@ const Logout = lazy(() => import('./pages/authPages/LogoutPage'));
 
 
 // App Pages
-  // Profile Pages
-  const ProfilePage = lazy(() => import('./pages/appPages/profilePages/ProfilePage'));
-  const SkillsPage = lazy(() => import('./pages/appPages/profilePages/SkillsPage'));
-  const AchievementPage = lazy(() => import('./pages/appPages/profilePages/AchievementPage'));
-  const FeedbackPage = lazy(() => import('./pages/appPages/profilePages/FeedbackPage'));
+const ProfilePage = lazy(() => import('./pages/appPages/ProfilePage'));
+const SkillsPage = lazy(() => import('./pages/appPages/SkillsPage'));
+const AchievementPage = lazy(() => import('./pages/appPages/AchievementPage'));
+const FeedbackPage = lazy(() => import('./pages/appPages/FeedbackPage'));
+const LearningPathsPage = lazy(() => import('./pages/appPages/LearningPathsPage'));
 
-  // Path Pages
-  const LearningPathsPage = lazy(() => import('./pages/appPages/pathPages/LearningPathsPage'));
-  const ProjectPathsPage = lazy(() => import('./pages/appPages/pathPages/ProjectPathsPage'));
-  const CareerPathsPage = lazy(() => import('./pages/appPages/pathPages/CareerPathsPage'));
-
-const DashboardPage = lazy(() => import('./pages/appPages/DashboardPage'));
 
 // Error Pages
 const NotFoundPage = lazy(() => import('./pages/errorPages/NotFoundPage'));
@@ -60,15 +54,11 @@ function AppLayout() {
 
           {/* Protected Routes */}
           <Route element={<AuthRequired />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/path/learning" element={<LearningPathsPage />} />
-            <Route path="/path/project" element={<ProjectPathsPage />} />
-            <Route path="/path/career" element={<CareerPathsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/skills" element={<SkillsPage />} />
-            <Route path="/profile/achievements" element={<AchievementPage />} />
-            <Route path="/profile/feedback" element={<FeedbackPage />} />
+            <Route path="/skills" element={<SkillsPage />} />
+            <Route path="/learning-paths" element={<LearningPathsPage />} />
+            <Route path="/achievements" element={<AchievementPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react"
-import AppSideBar from "../../../components/ProfileSection/ProfileSideBar";
-import ProfileHeader from "../../../components/ProfileSection/profilePage/ProfileHeader";
-import ExperienceSection from "../../../components/ProfileSection/profilePage/ExperienceSection";
+import AppSideBar from "../../components/ProfileSection/AppSideBar";
+import ProfileHeader from "../../components/ProfileSection/profilePage/ProfileHeader";
+import ExperienceSection from "../../components/ProfileSection/profilePage/ExperienceSection";
 
 export default function ProfilePage() {
     const email = localStorage.getItem("email");
@@ -14,7 +14,7 @@ export default function ProfilePage() {
       }, []);
 
     return (
-        <AppSideBar>
+        <AppSideBar>            
             <div ref={profilePage} className="flex items-center justify-center flex-col gap-5 w-full p-4 md:p-7 xl:py-8 xl:px-10">
 
                 <ProfileHeader email={email}/>
