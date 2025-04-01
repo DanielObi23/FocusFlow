@@ -8,7 +8,7 @@ export default function Feedback() {
             const subject = formData.get("subject");
             const message = formData.get("message");
             const email = localStorage.getItem("email");
-            const response = await axios.post(`/api/profile/sendFeedback`, {
+            const response = await axios.post(`/api/sendFeedback`, {
                 subject,
                 message,
                 email,

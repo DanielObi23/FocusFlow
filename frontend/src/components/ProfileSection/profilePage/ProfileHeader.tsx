@@ -53,8 +53,8 @@ export default function ProfileHeader({email}: email) {
     const {data, isLoading: profileIsLoading} = useQuery({
         queryKey: ['userProfile', email],
         queryFn: () => getUserData(email),
-        staleTime: 1000 * 60 * 60, // 1 hour
-        enabled: !!email // Only run query if email exists
+        staleTime: Infinity,  
+        enabled: !!email
     })
     
     const userProfile: UserProfile = data || defaultProfile;

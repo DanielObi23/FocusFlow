@@ -1,8 +1,10 @@
-import { useEffect, useState} from "react"
+import { useState} from "react"
 import axios from "axios"
 import { FaInfo } from "react-icons/fa";
 import toast from "../../toast";
 import WorkExperience from "./WorkExperience";
+import { useQuery } from "@tanstack/react-query"
+import { getUserExperience } from "../../../api/ExperienceApi"
 
 interface WorkExperienceItem {
     experience_id: string,
@@ -20,26 +22,18 @@ type email = {
 
 export default function ExperienceSection({email}: email) {
 
-    const [workExperience, setWorkExperience] = useState<WorkExperienceItem[]>([])
+    const [workExperiencel, setWorkExperience] = useState<WorkExperienceItem[]>([])
 
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    useEffect(() => {
-        async function getUserData() {
-            if (email) {
-                try {
-                    const response = await axios.post("/api/profile/userExperience", { email });
-                    // the sort is to make sure that the work experience is arranged based of the latest work experience
-                    setWorkExperience(response.data.work_experience
-                        .sort((a: WorkExperienceItem, b: WorkExperienceItem) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime()));
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        }
-        getUserData();
-    }, []);
+    const { data: workExperience, isLoading: experienceIsLoading } = useQuery({
+        queryKey: ["workExperience", email],
+        queryFn: () => getUserExperience(email),
+        staleTime: Infinity,
+        enabled: !!email
+    })
+
     
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setStartDate(e.target.value);
@@ -85,7 +79,7 @@ export default function ExperienceSection({email}: email) {
             
             if (existingDetailStr) {
                 const existingDetail = JSON.parse(existingDetailStr);
-                const workExperienceResponse = await axios.put(`/api/profile/updateWorkExperience/${existingDetail.experience_id}`, {
+                const workExperienceResponse = await axios.put(`/api/experience/updateWorkExperience/${existingDetail.experience_id}`, {
                     title,
                     company,
                     startDate,
@@ -103,7 +97,7 @@ export default function ExperienceSection({email}: email) {
                     )
                 );
             } else {
-                const workExperienceResponse = await axios.post(`/api/profile/addWorkExperience`, {
+                const workExperienceResponse = await axios.post(`/api/experience/addWorkExperience`, {
                     title,
                     company,
                     startDate,
@@ -142,7 +136,7 @@ export default function ExperienceSection({email}: email) {
         if (!experienceId) return;
 
         try {
-            await axios.delete(`/api/profile/deleteWorkExperience/${experienceId}`);
+            await axios.delete(`/api/experience/deleteWorkExperience/${experienceId}`);
 
             setWorkExperience(prev => 
                 prev.filter(job => job.experience_id !== experienceId)
@@ -176,19 +170,33 @@ export default function ExperienceSection({email}: email) {
         }
     }
 
-    const workExperienceList = workExperience.map(job => {
-        return <WorkExperience key={job.experience_id} detail={{
-            experience_id: job.experience_id,
-            jobTitle: job.title,
-            companyName: job.company,
-            startDate: job.start_date,
-            endDate: job.end_date,
-            experienceCategory: job.experience_category,
-            roleDescription: job.description,
-            delete: () => deleteExperience(job.experience_id),
-            edit: () => editExperience(job)
-        }}/>
-    });
+    interface WorkExperienceDetail {
+        experience_id: string;
+        jobTitle: string;
+        companyName: string;
+        startDate: string;
+        endDate: string;
+        experienceCategory: string;
+        roleDescription: string;
+        delete: () => void;
+        edit: () => void;
+    }
+
+    const workExperienceList = workExperience && workExperience.length > 0 
+        ? workExperience.map((job: WorkExperienceItem) => {
+            return <WorkExperience key={job.experience_id} detail={{
+                experience_id: job.experience_id,
+                jobTitle: job.title,
+                companyName: job.company,
+                startDate: job.start_date,
+                endDate: job.end_date,
+                experienceCategory: job.experience_category,
+                roleDescription: job.description,
+                delete: () => deleteExperience(job.experience_id),
+                edit: () => editExperience(job)
+            } as WorkExperienceDetail}/>
+        })
+        : [];
 
     return (
         <>

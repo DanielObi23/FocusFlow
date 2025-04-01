@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/addSkill", addSkill)
 
-router.post("/getAllSkills", getAllSkills)
+router.get("/getAllSkills/:email", getAllSkills)
 
 router.delete("/deleteSkill/:id", deleteSkill);
 

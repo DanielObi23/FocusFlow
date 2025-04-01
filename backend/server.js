@@ -9,6 +9,7 @@ import skillRoutes from "./routes/skillRoutes.js";
 import initDB from "./config/dbInit.js";
 import { aj, ajStrict } from "./lib/arcjet.js"
 import learningPathRoutes from "./routes/learningPathRoutes.js"
+import experienceRoutes from "./routes/experienceRoutes.js"
 
 dotenv.config();
 const app = express();
@@ -93,7 +94,25 @@ app.use("/api/ai", learningPathRoutes)
 
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
-app.use("/api/profile/skills", skillRoutes)
+app.use("/api/experience", experienceRoutes);
+app.use("/api/skills", skillRoutes);
+
+app.post('/api/sendFeedback', async (req, res) => {
+    try {
+        const { email, subject, message } = req.body;
+        sendEmail({
+            myEmail: process.env.MY_EMAIL,
+            subject,
+            text: message,
+            html: `Feedback from ${email}: <br/> <br/>${message}`,
+            name: "user"
+        })
+        res.status(200).json({message: "Feedback sent"})
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Server error"})
+    }
+})
 
 initDB().then(() => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

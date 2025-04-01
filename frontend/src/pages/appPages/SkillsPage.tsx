@@ -3,6 +3,8 @@ import SkillCard from "../../components/ProfileSection/skillsPage/SkillCard";
 import toast from "../../components/toast";
 import axios from "axios"
 import {useState, useEffect, useRef} from "react"
+import { useQuery } from "@tanstack/react-query"
+import { fetchSkills } from "../../api/skillsApi"
 
 interface Skills {
     name: string;
@@ -16,56 +18,56 @@ interface Skills {
 }
 export default function SkillsPage() {
     const email = localStorage.getItem('email');
-    const [skills, setSkills] = useState<Skills[]>([]);
+    const [skillsl, setSkills] = useState<Skills[]>([]);
     const [searchItem, setSearchItem] = useState('')
-    const [filteredSkills, setFilteredSkills] = useState(skills)
     const [render, forceReRender] = useState(0); // page wasn't rerendering when skill state was changed
-    const [loading, setLoading] = useState(true);
     const skillPage = useRef(null)
+    
+    const { data: skills, isLoading: skillIsLoading } = useQuery({
+        queryKey: ['skills', email],
+        queryFn: () => fetchSkills(email),
+        staleTime: Infinity,
+        enabled: !!email
+    });
+
+    const [filteredSkills, setFilteredSkills] = useState<Skills[]>([]);
+
+    useEffect(() => {
+        if (!skillIsLoading && skills) {
+            setFilteredSkills(skills);
+        }
+    }, [skillIsLoading, skills]);
 
     useEffect(() => {
         if (skillPage.current) {
             (skillPage.current as HTMLElement).scrollIntoView({ behavior: 'smooth' })
         }
-      }, []);
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
         const searchTerm = e.target.value;
         setSearchItem(searchTerm)
-        const filteredItems = skills.filter((skill) =>
+        const filteredItems: Skills[] = skills.filter((skill: Skills) =>
             skill.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+        );
         
         setFilteredSkills(filteredItems);
     }
 
     function filterByProficiency(proficiency: string) {
-        const filteredItems = skills.filter((skill) =>
+        const filteredItems = skills.filter((skill: Skills) =>
             skill.proficiency === proficiency
             );
         setFilteredSkills(filteredItems);
     }
     
     function filterByType(type: string) {
-        const filteredItems = skills.filter((skill) =>
+        const filteredItems = skills.filter((skill: Skills) =>
             skill.type === type
             );
         setFilteredSkills(filteredItems);
     }
 
-    useEffect(() => {
-        async function fetchSkills() {
-            try {
-                const response = await axios.post(`/api/profile/skills/getAllSkills`, {email})
-                setSkills(response.data);
-                setFilteredSkills(response.data);
-                setLoading(false);
-            } catch (err) {
-                toast({type: 'error', message: "Failed to load skills"})
-            }
-        }
-        fetchSkills();
-    }, [render]);
 
     function addSkill() {
         // clearing the input field
@@ -105,7 +107,7 @@ export default function SkillsPage() {
             const existingDetailStr = userSkillModal?.getAttribute('data-experience-detail');
             if (existingDetailStr) {
                 const existingDetail = JSON.parse(existingDetailStr);
-                const skillUpdateResponse = await axios.put(`/api/profile/skills/updateSkill/${existingDetail.skill_id}`, {
+                const skillUpdateResponse = await axios.put(`/api/skills/updateSkill/${existingDetail.skill_id}`, {
                     skillName,
                     yearsOfExperienceInt,
                     type,
@@ -123,7 +125,7 @@ export default function SkillsPage() {
                 );
                 forceReRender(prev => prev + 1);
             } else {
-                const response = await axios.post("/api/profile/skills/addSkill", {
+                const response = await axios.post("/api/skills/addSkill", {
                     skillName,
                     yearsOfExperienceInt,
                     type,
@@ -192,7 +194,7 @@ export default function SkillsPage() {
         if (!skillId) return;
 
         try {
-            const response = await axios.delete(`/api/profile/skills/deleteSkill/${skillId}`);
+            const response = await axios.delete(`/api/skills/deleteSkill/${skillId}`);
             setSkills(response.data);
             forceReRender(prev => prev + 1);
             (modal as HTMLDialogElement).close();
@@ -206,8 +208,8 @@ export default function SkillsPage() {
     function getSkillList(category: string) {
         // I'm using filtered skills because the default value is equal to skills, when i start filtering, i want the filtered list to change but not the actual skill list
         return {skills: filteredSkills
-                    .filter(skill => skill.skill_category === category)
-                    .map(skill => <SkillCard
+                    .filter((skill: Skills) => skill.skill_category === category)
+                    .map((skill: Skills) => <SkillCard
                                      key={skill.skill_id}
                                      detail={skill} 
                                      deleteSkill={deleteSkill}
@@ -381,7 +383,7 @@ export default function SkillsPage() {
                         </div>
                     </div>
                     <hr />
-                    {loading?
+                    {skillIsLoading?
                         <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">Searching For Skills</h1> :
                         (section.length > 0? section : <h1 className="text-4xl font-bold text-gray-600 text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">No Skill Found</h1>)}
                 </div>

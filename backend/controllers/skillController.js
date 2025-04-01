@@ -32,7 +32,7 @@ export const addSkill = async (req, res) => {
 export const getAllSkills = async (req, res) => {
     try {
         const user = await sql`
-            SELECT user_id FROM users WHERE email = ${req.body.email}`
+            SELECT user_id FROM users WHERE email = ${req.params.email}`
         if (user.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
