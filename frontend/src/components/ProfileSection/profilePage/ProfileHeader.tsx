@@ -5,59 +5,37 @@ import toast from "../../toast";
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import avatar from '../../../assets/avatar.webp'
-import { useQuery } from "@tanstack/react-query"
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
+import TruckLoader from "../../TruckLoader";
+import { UserProfile, getUserData, defaultProfile, updateUserProfile } from "../../../api/profileApi";
 
-interface UserProfile {
-    username: string,
-    email: string,
-    profile_image_url: string | null,
-    created_at: string,
-    first_name: string | null,
-    last_name: string | null,
-    phone_number: string | null,
-}
 
-type email = {
-    email: string | null
-}
-
-export default function ProfileHeader({email}: email) {    
+export default function ProfileHeader() {    
     const [value, setValue] = useState<string | undefined>()    
     const queryClient = useQueryClient();
 
-    const getUserData = async(email: string | null) => {
-        if (!email) {
-            throw new Error("Email is required");
-        }
-        
-        try {
-            const response = await axios.get(`/api/profile/userProfile/${email}`);
-            return response.data;  
-        } catch (error) {
-            console.error("Error fetching user profile:", error);
-            throw new Error("Error fetching user profile");
-        }
-    }
-
-    const defaultProfile: UserProfile = {
-        username: "",
-        email: "",
-        profile_image_url: null,
-        created_at: "",
-        first_name: null,
-        last_name: null,
-        phone_number: null
-    };
-
     const {data, isLoading: profileIsLoading} = useQuery({
-        queryKey: ['userProfile', email],
-        queryFn: () => getUserData(email),
-        staleTime: Infinity,  
-        enabled: !!email
+        queryKey: ['userProfile'],
+        queryFn: getUserData,
+        staleTime: Infinity
     })
     
     const userProfile: UserProfile = data || defaultProfile;
+
+    const {mutate} = useMutation({
+        mutationFn: (profile: UserProfile) => updateUserProfile(profile),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        },
+        onMutate: async (newProfile) => {
+            await queryClient.cancelQueries({ queryKey: ["userProfile"] })
+            const previousProfile = queryClient.getQueryData(["userProfile"])
+            queryClient.setQueryData(["userProfile"], (old: UserProfile) => {
+                return {...old, ...newProfile}
+            })
+            return { previousProfile }
+        }
+    })
 
     async function updateProfile(formData: FormData){
         try {
@@ -81,29 +59,25 @@ export default function ProfileHeader({email}: email) {
                     if (!phoneNumber || (typeof phoneNumber === 'string' && phoneNumber.length === 0)) {
                         phoneNumber = userProfile.phone_number;
                     }
-                    await axios.patch("/api/profile/updateProfile", {
-                        imageUrl, 
-                        firstName, 
-                        lastName, 
-                        phoneNumber, 
-                        email
-                    });
-                    queryClient.invalidateQueries({ queryKey: ["userProfile", email] });
-                    queryClient.invalidateQueries({ queryKey: ['profileImage'] }); // changing the profile in the header component
+                    mutate({
+                        profile_image_url: imageUrl, 
+                        first_name: firstName, 
+                        last_name: lastName, 
+                        phone_number: phoneNumber
+                    })                     
+                    queryClient.invalidateQueries({ queryKey: ['profileImage'] }); // changing the profile in the header component                    
                 }
             } else if (image instanceof File && image.name.length === 0) {
                 const imageUrl = userProfile.profile_image_url
                 if (!phoneNumber || (typeof phoneNumber === 'string' && phoneNumber.length === 0)) {
                     phoneNumber = userProfile.phone_number;
                 }
-                await axios.patch("/api/profile/updateProfile", {
-                    imageUrl, 
-                    firstName, 
-                    lastName, 
-                    phoneNumber, 
-                    email
-                });
-                queryClient.invalidateQueries({ queryKey: ['profileImage'] }); // changing the profile in the header component
+                mutate({
+                    profile_image_url: imageUrl, 
+                    first_name: firstName, 
+                    last_name: lastName, 
+                    phone_number: phoneNumber
+                }) 
             }
         } catch (err) {
             toast({type: 'error', message: "Error updating info, please try again later"});
@@ -114,111 +88,111 @@ export default function ProfileHeader({email}: email) {
     return (
         <div className="flex justify-between items-center border-2 px-5 py-7 mt-5 flex-col gap-4 w-full">
             {profileIsLoading? 
-            <div>Loading...</div> :
+                <TruckLoader /> :
             <>
-            <div className="flex justify-between w-full">
+                <div className="flex justify-between w-full">
 
-                {/* User profile */}
-                <div className="flex flex-col w-full">
-                    <div className="flex justify-between w-full">
-                        <div className="flex">
-                            <div className="avatar flex flex-col">
-                                <div className="w-24 rounded-full">
-                                    {userProfile.profile_image_url && userProfile.profile_image_url.length > 0 ? <img 
-                                        src={userProfile.profile_image_url} 
+                    {/* User profile */}
+                    <div className="flex flex-col w-full">
+                        <div className="flex justify-between w-full">
+                            <div className="flex">
+                                <div className="avatar flex flex-col">
+                                    <div className="w-24 rounded-full">
+                                        {userProfile.profile_image_url && userProfile.profile_image_url.length > 0 ? <img 
+                                            src={userProfile.profile_image_url} 
+                                            alt="Profile" 
+                                        /> : <img 
+                                        src={avatar} 
                                         alt="Profile" 
-                                    /> : <img 
-                                    src={avatar} 
-                                    alt="Profile" 
-                                />}
-                                </div>
-                            </div>
-                            <div className="ml-4 self-center">
-                                <h1 className="font-bold text-start text-primary text-xl capitalize">{userProfile.username}</h1>
-                                <p className="hidden md:block">Member since {new Date(userProfile.created_at).toDateString()}</p>
-                            </div>
-                        </div>
-                        <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
-                        const modal = document.getElementById('profile-modal');
-                            if (modal) {
-                                (modal as HTMLDialogElement).showModal();
-                            }
-                        }}>Edit Info</button>
-                    </div>
-                    <p className="block mt-2 md:hidden">Member since {new Date(userProfile.created_at).toDateString()}</p>
-                </div>
-
-                {/* The modal for editing the profile details */}
-                <div className="flex justify-between mr-3">
-                    <dialog id="profile-modal" className="modal">
-                        <div className="modal-box w-full">
-                            <form action={updateProfile} className="flex flex-col gap-4 w-full">
-                                <div className="flex gap-1">
-                                    <input type="file" name="image" className="file-input w-full" /> 
-                                    <div className="tooltip tooltip-left" data-tip="Profile image">
-                                        <p className="btn"><FaInfo /></p>
+                                    />}
                                     </div>
                                 </div>
-
-                                <label className="input w-full">
-                                    <span className="label"><span className="font-semibold text-lg">First name:</span></span>
-                                    <input type="text" name="first_name" placeholder="e.g John" defaultValue={userProfile.first_name || ""} maxLength={30}/>
-                                </label>
-
-                                <label className="input w-full">
-                                    <span className="label"><span className="font-semibold text-lg">Last name:</span></span>
-                                    <input type="text" name="last_name" placeholder="e.g Smith" defaultValue={userProfile.last_name || ""} maxLength={30}/>
-                                </label>
-
-                                <label className="input w-full">
-                                    <PhoneInput
-                                        placeholder="Enter phone number"
-                                        className="w-full"
-                                        name="number"
-                                        value={value}
-                                        onChange={setValue}/>
-                                </label>
-                                <div className="w-full flex justify-between">
-                                    <button type="button" className="btn" onClick={()=>{
-                                        const modal = document.getElementById('profile-modal');
-                                        if (modal) {
-                                            (modal as HTMLDialogElement).close();
-                                        }
-                                    }}>Cancel</button>
-                                    <button type="submit" className="btn" onClick={()=>{
-                                        const modal = document.getElementById('profile-modal');
-                                        if (modal) {
-                                            (modal as HTMLDialogElement).close();
-                                        }
-                                    }}>Save changes</button>
+                                <div className="ml-4 self-center">
+                                    <h1 className="font-bold text-start text-primary text-xl capitalize">{userProfile.username}</h1>
+                                    <p className="hidden md:block">Member since {userProfile.created_at ? new Date(userProfile.created_at).toDateString() : "N/A"}</p>
                                 </div>
-                            </form>
+                            </div>
+                            <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={() => {
+                            const modal = document.getElementById('profile-modal');
+                                if (modal) {
+                                    (modal as HTMLDialogElement).showModal();
+                                }
+                            }}>Edit Info</button>
                         </div>
-                    </dialog>
-                </div>
-            </div>
+                        <p className="block mt-2 md:hidden">Member since {userProfile.created_at ? new Date(userProfile.created_at).toDateString() : "N/A"}</p>
+                    </div>
 
-            {/* Profile details */}
-            <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
-                <fieldset className="border-2 p-5 sm:w-1/2 w-full">
-                    <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;First name&nbsp;&nbsp;</legend>
-                    <p className="text-accent italic capitalize text-lg">{userProfile.first_name || "Add your first name"}</p>
-                </fieldset>
-                <fieldset className="border-2 p-5 sm:w-1/2 w-full">
-                    <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;Last name&nbsp;&nbsp;</legend>
-                    <p className="text-accent italic capitalize text-lg">{userProfile.last_name || "Add your last name"}</p>
-                </fieldset>
-            </div>
-            <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
-                <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
-                    <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Email&nbsp;&nbsp;</legend>
-                    <p className="text-accent italic text-lg">{userProfile.email}</p>
-                </fieldset>
-                <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
-                    <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Phone number&nbsp;&nbsp;</legend>
-                    <p className="text-accent italic text-lg">{userProfile.phone_number || "Add your contact number"}</p>
-                </fieldset>
-            </div>
+                    {/* The modal for editing the profile details */}
+                    <div className="flex justify-between mr-3">
+                        <dialog id="profile-modal" className="modal">
+                            <div className="modal-box w-full">
+                                <form action={updateProfile} className="flex flex-col gap-4 w-full">
+                                    <div className="flex gap-1">
+                                        <input type="file" name="image" className="file-input w-full" /> 
+                                        <div className="tooltip tooltip-left" data-tip="Profile image">
+                                            <p className="btn"><FaInfo /></p>
+                                        </div>
+                                    </div>
+
+                                    <label className="input w-full">
+                                        <span className="label"><span className="font-semibold text-lg">First name:</span></span>
+                                        <input type="text" name="first_name" placeholder="e.g John" defaultValue={typeof userProfile.first_name === 'string' ? userProfile.first_name : ""} maxLength={30}/>
+                                    </label>
+
+                                    <label className="input w-full">
+                                        <span className="label"><span className="font-semibold text-lg">Last name:</span></span>
+                                        <input type="text" name="last_name" placeholder="e.g Smith" defaultValue={typeof userProfile.last_name === 'string' ? userProfile.last_name : ""} maxLength={30}/>
+                                    </label>
+
+                                    <label className="input w-full">
+                                        <PhoneInput
+                                            placeholder="Enter phone number"
+                                            className="w-full"
+                                            name="number"
+                                            value={value}
+                                            onChange={setValue}/>
+                                    </label>
+                                    <div className="w-full flex justify-between">
+                                        <button type="button" className="btn" onClick={()=>{
+                                            const modal = document.getElementById('profile-modal');
+                                            if (modal) {
+                                                (modal as HTMLDialogElement).close();
+                                            }
+                                        }}>Cancel</button>
+                                        <button type="submit" className="btn" onClick={()=>{
+                                            const modal = document.getElementById('profile-modal');
+                                            if (modal) {
+                                                (modal as HTMLDialogElement).close();
+                                            }
+                                        }}>Save changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </dialog>
+                    </div>
+                </div>
+
+                {/* Profile details */}
+                <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
+                    <fieldset className="border-2 p-5 sm:w-1/2 w-full">
+                        <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;First name&nbsp;&nbsp;</legend>
+                        <p className="text-accent italic capitalize text-lg">{typeof userProfile.first_name === 'string' ? userProfile.first_name : "Add your first name"}</p>
+                    </fieldset>
+                    <fieldset className="border-2 p-5 sm:w-1/2 w-full">
+                        <legend className="font-semibold text-xl text-primary">&nbsp;&nbsp;Last name&nbsp;&nbsp;</legend>
+                        <p className="text-accent italic capitalize text-lg">{typeof userProfile.last_name === 'string' ? userProfile.last_name : "Add your last name"}</p>
+                    </fieldset>
+                </div>
+                <div className="flex w-full justify-between font-semibold gap-3 flex-col sm:flex-row">
+                    <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
+                        <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Email&nbsp;&nbsp;</legend>
+                        <p className="text-accent italic text-lg">{userProfile.email}</p>
+                    </fieldset>
+                    <fieldset className="border-2 px-3 py-5 sm:w-1/2 w-full">
+                        <legend className="font-semibold text-lg text-primary">&nbsp;&nbsp;Phone number&nbsp;&nbsp;</legend>
+                        <p className="text-accent italic text-lg">{typeof userProfile.phone_number === 'string' ? userProfile.phone_number : "Add your contact number"}</p>
+                    </fieldset>
+                </div>
             </>}
         </div>
     )

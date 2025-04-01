@@ -1,39 +1,114 @@
-import { useState} from "react"
-import axios from "axios"
+import { useState } from "react"
 import { FaInfo } from "react-icons/fa";
 import toast from "../../toast";
 import WorkExperience from "./WorkExperience";
-import { useQuery } from "@tanstack/react-query"
-import { getUserExperience } from "../../../api/ExperienceApi"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { getUserExperience, deleteUserExperience, editUserExperience, addUserExperience, WorkExperienceItem, ExperienceItem } from "../../../api/ExperienceApi"
+import TruckLoader from "../../TruckLoader";
 
-interface WorkExperienceItem {
-    experience_id: string,
-    title: string,
-    company: string,
-    start_date: string,
-    end_date: string,
-    experience_category: string,
-    description: string
-}
-
-type email = {
-    email: string | null
-}
-
-export default function ExperienceSection({email}: email) {
-
-    const [workExperiencel, setWorkExperience] = useState<WorkExperienceItem[]>([])
-
+export default function ExperienceSection() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
+    const queryClient = useQueryClient();
+
     const { data: workExperience, isLoading: experienceIsLoading } = useQuery({
-        queryKey: ["workExperience", email],
-        queryFn: () => getUserExperience(email),
-        staleTime: Infinity,
-        enabled: !!email
+        queryKey: ["workExperience"],
+        queryFn: getUserExperience,
+        staleTime: Infinity
     })
 
+    const { mutate: deleteExperienceDetails } = useMutation({
+        mutationFn: (experienceId: string) => deleteUserExperience(experienceId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["workExperience"] });
+            const modal = document.getElementById('delete-modal');
+            if (!modal) return;
+            (modal as HTMLDialogElement).close();
+        },
+        onMutate: async (experienceId: string) => {
+            await queryClient.cancelQueries({ queryKey: ["workExperience"] })
+            const previousList = queryClient.getQueryData(["workExperience"])
+            queryClient.setQueryData<WorkExperienceItem[]>(["workExperience"], (old) => 
+                old ? old.filter((item) => item.experience_id !== experienceId) : []
+            );
+            const modal = document.getElementById('delete-modal');
+            if (!modal) return;
+            (modal as HTMLDialogElement).close();
+            return { previousList };
+        },
+        onError: (error) => {
+            toast({ type: 'error', message: "Failed to delete experience" });
+            console.error(error);
+          },
+    })
+    
+    const { mutate: editExperienceDetails } = useMutation({
+        mutationFn: (experience: ExperienceItem) => editUserExperience(experience),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["workExperience"] });
+            const modal = document.getElementById('edit-modal');
+            if (!modal) return;
+            (modal as HTMLDialogElement).close();
+        },
+        onError: (error) => {
+            toast({ type: 'error', message: "Failed to update experience" });
+            console.error(error);
+        },
+        onMutate: async (experience: ExperienceItem) => {
+            await queryClient.cancelQueries({ queryKey: ["workExperience"] })
+            const previousList = queryClient.getQueryData(["workExperience"])
+            queryClient.setQueryData<WorkExperienceItem[]>(["workExperience"], (old) => 
+                old ? old.map(item => {
+                    return item.experience_id === experience.experience_id ? 
+                        {...item, ...experience} as WorkExperienceItem : item;
+                }) : []
+            );
+            const modal = document.getElementById('edit-modal');
+            if (!modal) return;
+            (modal as HTMLDialogElement).close();
+            return { previousList };
+        }
+    })
+
+    const { mutate: addExperienceDetails } = useMutation({
+        mutationFn: (experience: ExperienceItem) => addUserExperience(experience),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["workExperience"] });
+            const modal = document.getElementById('work_experience-modal');
+            if (!modal) return;
+            (modal as HTMLDialogElement).close();
+        },
+        onError: (error) => {
+            toast({ type: 'error', message: "Failed to add experience" });
+            console.error(error);
+        },
+        onMutate: async (experience: ExperienceItem) => {
+            await queryClient.cancelQueries({ queryKey: ["workExperience"] })
+            const previousList = queryClient.getQueryData(["workExperience"]) || []
+            queryClient.setQueryData<WorkExperienceItem[]>(["workExperience"], (old) => {
+                if (!old) return [];
+                
+                const newList = [...old, {
+                    experience_id: "temporary", 
+                    title: experience.title,
+                    company: experience.company,
+                    start_date: experience.startDate,
+                    end_date: experience.endDate,
+                    experience_category: experience.experienceCategory,
+                    description: experience.description
+                } as WorkExperienceItem];
+                
+                return newList.sort((a, b) => 
+                    new Date(b.end_date).getTime() - new Date(a.end_date).getTime()
+                );
+            });
+            const modal = document.getElementById('edit-modal');
+            if (!modal) return;
+            (modal as HTMLDialogElement).close();
+            return { previousList };
+        }
+    })
     
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setStartDate(e.target.value);
@@ -61,7 +136,7 @@ export default function ExperienceSection({email}: email) {
         }
     }
     
-    async function handleExperience(formData: FormData) {
+    function handleExperience(formData: FormData) {
         try {
             const experienceModalOpen = document.getElementById('work_experience-modal');
             if (experienceModalOpen) {
@@ -78,40 +153,27 @@ export default function ExperienceSection({email}: email) {
             const existingDetailStr = modal?.getAttribute('data-experience-detail');
             
             if (existingDetailStr) {
-                const existingDetail = JSON.parse(existingDetailStr);
-                const workExperienceResponse = await axios.put(`/api/experience/updateWorkExperience/${existingDetail.experience_id}`, {
+                const {experience_id} = JSON.parse(existingDetailStr);
+                editExperienceDetails({
+                    experience_id,
                     title,
                     company,
                     startDate,
                     endDate,
                     experienceCategory,
-                    description,
-                    email
-                });
+                    description
+                })
     
-                setWorkExperience(prev => 
-                    prev.map(job => 
-                        job.experience_id === existingDetail.experience_id 
-                        ? workExperienceResponse.data 
-                        : job
-                    )
-                );
+    
             } else {
-                const workExperienceResponse = await axios.post(`/api/experience/addWorkExperience`, {
+                addExperienceDetails({
                     title,
                     company,
                     startDate,
                     endDate,
                     experienceCategory,
-                    description,
-                    email
-                });
-                setWorkExperience(prev => [...prev, workExperienceResponse.data]);
-            }
-    
-            const experienceModal = document.getElementById('work_experience-modal') || document.getElementById('edit-modal');
-            if (experienceModal) {
-                (experienceModal as HTMLDialogElement).close();
+                    description
+                })
             }
     
         } catch (err) {
@@ -120,7 +182,7 @@ export default function ExperienceSection({email}: email) {
         }
     }
 
-    async function deleteExperience(id: string) {
+    function deleteExperience(id: string) {
         const modal = document.getElementById('delete-modal');
         if (modal) {
             modal.setAttribute('data-experience-id', id);
@@ -128,27 +190,14 @@ export default function ExperienceSection({email}: email) {
         }
     }
 
-    async function handleConfirmedDelete() {
-        const modal = document.getElementById('delete-modal');
-        if (!modal) return;
-
-        const experienceId = modal.getAttribute('data-experience-id');
+    function handleConfirmedDelete() {
+        const experienceId = document.getElementById('delete-modal')?.getAttribute('data-experience-id');
         if (!experienceId) return;
 
-        try {
-            await axios.delete(`/api/experience/deleteWorkExperience/${experienceId}`);
-
-            setWorkExperience(prev => 
-                prev.filter(job => job.experience_id !== experienceId)
-            );
-            (modal as HTMLDialogElement).close();
-        } catch (err) {
-            toast({type: 'error', message: "Error deleting experience, please try again later"});
-            console.error(err);
-        }
+        deleteExperienceDetails(experienceId as string);
     }
 
-    async function editExperience(detail: WorkExperienceItem) {
+    function editExperience(detail: WorkExperienceItem) {
         const modal = document.getElementById('work_experience-modal');
         if (modal) {
             modal.setAttribute('data-experience-detail', JSON.stringify(detail));
@@ -201,6 +250,7 @@ export default function ExperienceSection({email}: email) {
     return (
         <>
             <fieldset className="border-2 flex gap-4 px-5 pb-7 pt-5 mt-5 flex-col w-full">
+                {experienceIsLoading ? <TruckLoader /> :<>
                 <legend className="font-bold text-2xl lg:text-3xl text-primary">&nbsp;&nbsp;Work experience&nbsp;&nbsp;</legend>
                 <div className="flex self-end">
                     <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={addExperience}>Add Experience</button>
@@ -276,7 +326,7 @@ export default function ExperienceSection({email}: email) {
                 </div>
                 <ul className="flex flex-col gap-2.5">
                     {workExperienceList}
-                </ul>
+                </ul></>}
             </fieldset>
             <dialog id="delete-modal" className="modal">
                 <div className="modal-box w-full">

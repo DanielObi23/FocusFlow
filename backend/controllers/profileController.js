@@ -34,23 +34,23 @@ export const uploadProfileImage = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const {
-            email,
-            firstName,
-            lastName,
-            phoneNumber,
-            imageUrl
+            profile_image_url, 
+            first_name, 
+            last_name, 
+            phone_number, 
+            email
         } = req.body
         
         // Construct full S3 URL if not already full URL
-        const fullImageUrl = imageUrl.startsWith('http') 
-            ? imageUrl 
-            : `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${imageUrl}`
+        const fullImageUrl = profile_image_url.startsWith('http') 
+            ? profile_image_url
+            : `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${profile_image_url}`
         
         const user = await sql`
             UPDATE users
-            SET first_name = ${firstName},
-                last_name = ${lastName},
-                phone_number = ${phoneNumber},
+            SET first_name = ${first_name},
+                last_name = ${last_name},
+                phone_number = ${phone_number},
                 profile_image_url = ${fullImageUrl}
             WHERE email = ${email} RETURNING *
         `;
