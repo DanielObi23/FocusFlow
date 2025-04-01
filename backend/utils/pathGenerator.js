@@ -69,19 +69,19 @@ export const generateLearningPath = async (skillName, category, timeframe, consi
         content: `Create a ${skillName} learning path for ${category} with the following structure:
         
         {
+          "title": (string),
           "phases": [
             {
               "order": (number),
               "title": (string),
               "type": (either "theory" or "practice"),
               "resources": { 
-                "free": [{"title": (string), "url": (string), "interactive": (boolean)}],
+                "free": [{"title": (string), "url": (string)}],
                 "paid": [{"title": (string), "url": (string)}]
               },
               "practiceDetails": {
                 "objective": (string),
-                "deliverables": [(string array)],
-                "exampleInspiration": (string)
+                "deliverables": [(string array)]
               },
               "estimatedHours": (number),
               "checklist": [(string array of 5-7 items max)]

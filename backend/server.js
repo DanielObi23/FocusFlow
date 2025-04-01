@@ -51,7 +51,7 @@ app.use("/api", async (req, res, next) => {
 
         next();
     } catch (err) {
-        console.log("Arcjet error", err);
+        //console.log("Arcjet error", err);
         next(err)
     }
 })
@@ -83,7 +83,7 @@ app.use("/api/ai", async (req, res, next) => {
 
         next();
     } catch (err) {
-        console.log("Arcjet error", err);
+        //console.log("Arcjet error", err);
         next(err)
     }
 })

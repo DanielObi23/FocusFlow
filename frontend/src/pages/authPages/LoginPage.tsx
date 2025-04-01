@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../contexts/AuthContext';
-import toast from "../../utils/toast";
+import toast from "../../components/toast";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -14,7 +14,7 @@ export default function LoginPage() {
     try {
       await login({ email, password });
       localStorage.setItem("email", email);
-      navigate("/profile", {state: {email}});
+      navigate("/", {state: {email}});
     } catch (err) {
       toast({type: 'error', message: 'Incorrect password/email! Please try again'})
       console.error(err);

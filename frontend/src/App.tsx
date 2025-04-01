@@ -4,6 +4,9 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import TruckLoader from "./components/TruckLoader"
+import Header from "./components/Header"
+import AuthRequired from "./components/AuthRequired"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Auth Pages
 const LoginPage = lazy(() => import('./pages/authPages/LoginPage'));
@@ -26,12 +29,6 @@ const LearningPathsPage = lazy(() => import('./pages/appPages/LearningPathsPage'
 const NotFoundPage = lazy(() => import('./pages/errorPages/NotFoundPage'));
 const ContactSupportPage = lazy(() => import('./pages/errorPages/ContactSupportPage'));
 
-// Components
-import Header from "./components/Header"
-import AuthRequired from "./components/AuthRequired"
-
-// Loading Component
-// From Uiverse.io by vinodjangid07 
 
 function AppLayout() {
   const location = useLocation();
@@ -51,16 +48,16 @@ function AppLayout() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:token" element={<PasswordResetPage />} />
           <Route path="/support" element={<ContactSupportPage />} />
+          <Route path="*" element={<NotFoundPage />} />
 
           {/* Protected Routes */}
           <Route element={<AuthRequired />}>
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/" element={<ProfilePage />} />
             <Route path="/skills" element={<SkillsPage />} />
             <Route path="/learning-paths" element={<LearningPathsPage />} />
             <Route path="/achievements" element={<AchievementPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </Suspense>
@@ -74,10 +71,12 @@ export default function App() {
   theme && document.getElementsByTagName("html")[0].setAttribute("data-theme", theme);
 
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppLayout />
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={new QueryClient()}>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppLayout />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

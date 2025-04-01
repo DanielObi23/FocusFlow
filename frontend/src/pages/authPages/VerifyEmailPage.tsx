@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import toast from "../../utils/toast";
+import toast from "../../components/toast";
 
 export default function VerifyEmail() {
     const location = useLocation();

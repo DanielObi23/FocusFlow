@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import toast from "../../utils/toast";
+import toast from "../../components/toast";
 import axios from "axios";
 
 export default function PasswordResetPage() {

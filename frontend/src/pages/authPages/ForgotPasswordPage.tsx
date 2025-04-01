@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import toast from "../../utils/toast";
+import toast from "../../components/toast";
 
 export default function ForgotPasswordPage() {
     const navigate = useNavigate();

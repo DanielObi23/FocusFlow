@@ -28,14 +28,14 @@ const skills = [
 ];
 
 // Main function call with result handling
-(async () => {
-  try {
-    const learningPath = await generateLearningPath("react", "Technical Skills", "1 week to a month", skills, workExperience);
-    console.log(JSON.stringify(learningPath, null, 2)); // Pretty print the JSON for readability
-  } catch (error) {
-    console.error("Failed to generate learning path:", error);
-  }
-})();
+// (async () => {
+//   try {
+//     const learningPath = await generateLearningPath("react", "Technical Skills", "1 week to a month", skills, workExperience);
+//     console.log(JSON.stringify(learningPath, null, 2)); // Pretty print the JSON for readability
+//   } catch (error) {
+//     console.error("Failed to generate learning path:", error);
+//   }
+// })();
 
 export const createPath = async (req, res) => {
   try {

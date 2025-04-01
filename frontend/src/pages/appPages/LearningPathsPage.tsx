@@ -1,4 +1,5 @@
 import AppSideBar from "../../components/ProfileSection/AppSideBar"
+import SkillToLearn from "../../components/ProfileSection/learningPathsPage/SkillToLearn"
 import { Link } from "react-router-dom"
 
 export default function LearningPathsPage() {
@@ -84,45 +85,9 @@ export default function LearningPathsPage() {
                 </div>
                 <hr />
                 <div className="flex flex-col gap-3">
-                    <div className="collapse bg-secondary border border-base-300">
-                        <input type="radio" name="my-accordion-1" />
-                        <div className="collapse-title font-semibold font-secondary-content flex justify-between">
-                            <h1>How do I create an account? </h1>
-                            <div
-                                className="radial-progress bg-primary text-primary-content border-primary border-4"
-                                style={{ "--value": "70", "--size": "4rem", "--thickness": "0.5rem" } as React.CSSProperties} aria-valuenow={70} role="progressbar">
-                                70%
-                            </div>
-                        </div>
-                        <div className="collapse-content text-sm font-secondary-content">Click the "Sign Up" button in the top right corner and follow the registration process.</div>
-                    </div>
-                    <div className="collapse bg-secondary border border-base-300">
-                        <input type="radio" name="my-accordion-1" />
-                        <div className="collapse-title font-semibold font-secondary-content flex justify-between">
-                            <h1>I forgot my password. What should I do?</h1> 
-                            <div className="radial-progress" style={{ "--value": "70", "--size": "4rem", "--thickness": "0.5rem" } as React.CSSProperties} aria-valuenow={70} role="progressbar">70%</div>
-                        </div>
-                        <div className="collapse-content text-sm font-secondary-content">
-                            <ul className="steps steps-vertical">
-                                <li className="step step-primary">Register</li>
-                                <li className="step step-primary">Choose plan</li>
-                                <li className="step">Purchase</li>
-                                <li className="step">Receive Product</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="collapse bg-secondary border border-base-300">
-                        <input type="radio" name="my-accordion-1" />
-                        <div className="collapse-title font-semibold font-secondary-content">How do I update my profile information?</div>
-                        <div className="collapse-content text-sm font-secondary-content">
-                        <ul className="steps steps-vertical">
-                            <li className="step step-primary">Register</li>
-                            <li className="step step-primary">Choose plan</li>
-                            <li className="step">Purchase</li>
-                            <li className="step">Receive Product</li>
-                        </ul>
-                        </div>
-                    </div>
+                    <SkillToLearn />
+                    <SkillToLearn />
+                    <SkillToLearn />
                 </div>
             </div>
         </AppSideBar>

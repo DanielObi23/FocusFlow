@@ -1,6 +1,6 @@
 import AppSideBar from "../../components/ProfileSection/AppSideBar";
 import SkillCard from "../../components/ProfileSection/skillsPage/SkillCard";
-import toast from "../../utils/toast";
+import toast from "../../components/toast";
 import axios from "axios"
 import {useState, useEffect, useRef} from "react"
 

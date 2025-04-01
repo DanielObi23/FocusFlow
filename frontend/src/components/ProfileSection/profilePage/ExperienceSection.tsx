@@ -1,7 +1,7 @@
 import { useEffect, useState} from "react"
 import axios from "axios"
 import { FaInfo } from "react-icons/fa";
-import toast from "../../../utils/toast";
+import toast from "../../toast";
 import WorkExperience from "./WorkExperience";
 
 interface WorkExperienceItem {

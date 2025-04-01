@@ -3,13 +3,13 @@ import { userProfile, uploadProfileImage, updateProfile, getProfileImage, userEx
 
 const router = express.Router();
 
-router.post("/userProfile", userProfile);
+router.get("/userProfile/:email", userProfile);
 
 router.post("/userExperience", userExperience);
 
 router.get("/profileUrl", uploadProfileImage);
 
-router.post("/profileImage", getProfileImage);
+router.get("/profileImage/:email", getProfileImage);
 
 router.patch("/updateProfile", updateProfile);
 

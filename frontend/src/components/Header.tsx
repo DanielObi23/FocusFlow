@@ -1,19 +1,29 @@
 import { Link } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import avatar from "../assets/avatar.webp"
 
 export default function Header() {
-  //TODO: for header background, consider changing the background to bg-gradient-to-r from-primary to-secondary, after making the whole app
-  const [profileImage, setProfileImage] = useState("");
+  const email = localStorage.getItem("email");
 
-  useEffect(() => {
-    async function fetchProfileImage() {
-      const response = await axios.post("/api/profile/profileImage", {email: localStorage.getItem("email")});
-      setProfileImage(response.data.profile_image_url);
-    };
-    fetchProfileImage()
-  }, [])
+  async function getProfileImage(email: string | null) {
+    if (!email) throw new Error("No email address provided");
+    try {
+      const response = await axios.get(`/api/profile/profileImage/${email}`);
+      return response.data.profile_image_url;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  const {data: profileImage, isLoading: profileImageIsLoading} = useQuery({
+    queryKey: ['profileImage'],
+    queryFn: () => getProfileImage(email),
+    staleTime: 1000 * 60 * 60, // 1 hour
+    enabled: !!email // Only run query if email exists
+  })
+
   return (
     <header 
       style={{ fontFamily: "Inter" }} 
@@ -25,9 +35,9 @@ export default function Header() {
       
       {/* Profile image at right */}
       <div className="flex-none">
-        <Link to="/profile">
+        <Link to="/">
           <img 
-              src={profileImage? profileImage : avatar} 
+              src={!profileImage || profileImageIsLoading? avatar : profileImage} 
               alt="profile settings"
               className="size-15 md:size-17 lg:size-19 object-cover rounded-full"
             />

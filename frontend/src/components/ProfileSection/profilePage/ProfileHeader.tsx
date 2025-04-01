@@ -1,10 +1,12 @@
-import { useEffect, useState} from "react"
+import { useState } from "react"
 import axios from "axios"
 import { FaInfo } from "react-icons/fa";
-import toast from "../../../utils/toast";
+import toast from "../../toast";
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import avatar from '../../../assets/avatar.webp'
+import { useQuery } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UserProfile {
     username: string,
@@ -20,8 +22,25 @@ type email = {
     email: string | null
 }
 
-export default function ProfileHeader({email}: email) {
-    const [userProfile, setUserProfile] = useState<UserProfile>({
+export default function ProfileHeader({email}: email) {    
+    const [value, setValue] = useState<string | undefined>()    
+    const queryClient = useQueryClient();
+
+    const getUserData = async(email: string | null) => {
+        if (!email) {
+            throw new Error("Email is required");
+        }
+        
+        try {
+            const response = await axios.get(`/api/profile/userProfile/${email}`);
+            return response.data;  
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+            throw new Error("Error fetching user profile");
+        }
+    }
+
+    const defaultProfile: UserProfile = {
         username: "",
         email: "",
         profile_image_url: null,
@@ -29,21 +48,16 @@ export default function ProfileHeader({email}: email) {
         first_name: null,
         last_name: null,
         phone_number: null
+    };
+
+    const {data, isLoading: profileIsLoading} = useQuery({
+        queryKey: ['userProfile', email],
+        queryFn: () => getUserData(email),
+        staleTime: 1000 * 60 * 60, // 1 hour
+        enabled: !!email // Only run query if email exists
     })
-    const [value, setValue] = useState<string | undefined>()
-    useEffect(() => {
-        async function getUserData() {
-            if (email) {
-                try {
-                    const response = await axios.post("/api/profile/userProfile", { email });
-                    setUserProfile(response.data.profile);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        }
-        getUserData();
-    }, []);
+    
+    const userProfile: UserProfile = data || defaultProfile;
 
     async function updateProfile(formData: FormData){
         try {
@@ -67,32 +81,29 @@ export default function ProfileHeader({email}: email) {
                     if (!phoneNumber || (typeof phoneNumber === 'string' && phoneNumber.length === 0)) {
                         phoneNumber = userProfile.phone_number;
                     }
-                    const response = await axios.patch("/api/profile/updateProfile", {
+                    await axios.patch("/api/profile/updateProfile", {
                         imageUrl, 
                         firstName, 
                         lastName, 
                         phoneNumber, 
                         email
                     });
-        
-                    setUserProfile(response.data);
-                    // reloading so the header component profile photo changes as well
-                    window.location.reload()
+                    queryClient.invalidateQueries({ queryKey: ["userProfile", email] });
+                    queryClient.invalidateQueries({ queryKey: ['profileImage'] }); // changing the profile in the header component
                 }
             } else if (image instanceof File && image.name.length === 0) {
                 const imageUrl = userProfile.profile_image_url
                 if (!phoneNumber || (typeof phoneNumber === 'string' && phoneNumber.length === 0)) {
                     phoneNumber = userProfile.phone_number;
                 }
-                const response = await axios.patch("/api/profile/updateProfile", {
+                await axios.patch("/api/profile/updateProfile", {
                     imageUrl, 
                     firstName, 
                     lastName, 
                     phoneNumber, 
                     email
                 });
-    
-                setUserProfile(response.data);
+                queryClient.invalidateQueries({ queryKey: ['profileImage'] }); // changing the profile in the header component
             }
         } catch (err) {
             toast({type: 'error', message: "Error updating info, please try again later"});
@@ -102,6 +113,9 @@ export default function ProfileHeader({email}: email) {
 
     return (
         <div className="flex justify-between items-center border-2 px-5 py-7 mt-5 flex-col gap-4 w-full">
+            {profileIsLoading? 
+            <div>Loading...</div> :
+            <>
             <div className="flex justify-between w-full">
 
                 {/* User profile */}
@@ -140,7 +154,7 @@ export default function ProfileHeader({email}: email) {
                         <div className="modal-box w-full">
                             <form action={updateProfile} className="flex flex-col gap-4 w-full">
                                 <div className="flex gap-1">
-                                    <input type="file" name="image" className="file-input w-full" defaultValue={userProfile.profile_image_url || ""} /> 
+                                    <input type="file" name="image" className="file-input w-full" /> 
                                     <div className="tooltip tooltip-left" data-tip="Profile image">
                                         <p className="btn"><FaInfo /></p>
                                     </div>
@@ -205,6 +219,7 @@ export default function ProfileHeader({email}: email) {
                     <p className="text-accent italic text-lg">{userProfile.phone_number || "Add your contact number"}</p>
                 </fieldset>
             </div>
+            </>}
         </div>
     )
 }

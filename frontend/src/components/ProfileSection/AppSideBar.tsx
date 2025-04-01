@@ -23,7 +23,7 @@ interface AppSideBarProps {
                 <label htmlFor="profile-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
                 <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
                     {/* Sidebar content here */}
-                    <li className="my-2 font-bold text-xl"><Link to="/profile">Profile</Link></li>
+                    <li className="my-2 font-bold text-xl"><Link to="/">Profile</Link></li>
                     <hr />
                     <li className="my-2 font-bold text-xl"><Link to="/skills">Skills & Interest</Link></li>
                     <hr />

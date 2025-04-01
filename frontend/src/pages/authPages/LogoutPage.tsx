@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import toast from "../../utils/toast";
+import toast from "../../components/toast";
 import TruckLoader from "../../components/TruckLoader"
 const Logout: React.FC = () => {
   const { logout } = useAuth();
