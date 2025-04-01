@@ -1,34 +1,102 @@
 import AppSideBar from "../../components/ProfileSection/AppSideBar";
 import SkillCard from "../../components/ProfileSection/skillsPage/SkillCard";
 import toast from "../../components/toast";
-import axios from "axios"
 import {useState, useEffect, useRef} from "react"
-import { useQuery } from "@tanstack/react-query"
-import { fetchSkills } from "../../api/skillsApi"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { fetchSkills, deleteUserSkill, Skills, addUserSkill, SkillsItem, updateUserSkill } from "../../api/skillsApi"
 
-interface Skills {
-    name: string;
-    years_of_experience: number;
-    type: string;
-    skill_category: string;
-    proficiency: string;
-    description: string;
-    created_at: string;
-    skill_id: string;
-}
 export default function SkillsPage() {
-    const email = localStorage.getItem('email');
-    const [skillsl, setSkills] = useState<Skills[]>([]);
     const [searchItem, setSearchItem] = useState('')
-    const [render, forceReRender] = useState(0); // page wasn't rerendering when skill state was changed
     const skillPage = useRef(null)
     
+    const queryClient = useQueryClient();
+
     const { data: skills, isLoading: skillIsLoading } = useQuery({
-        queryKey: ['skills', email],
-        queryFn: () => fetchSkills(email),
-        staleTime: Infinity,
-        enabled: !!email
+        queryKey: ['skills'],
+        queryFn: fetchSkills,
+        staleTime: Infinity
     });
+
+    const { mutate: removeUserSkill } = useMutation({
+        mutationFn: (id: string) => deleteUserSkill(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['skills'] })
+        },
+        onMutate: async (id: string) => {
+            await queryClient.cancelQueries({ queryKey: ['skills'] })
+            const previousList = await queryClient.getQueryData(['skills'])
+            queryClient.setQueryData<Skills[]>(['skills'], (old) => {
+                return old?.filter((skill: Skills) => skill.skill_id !== id)
+            })
+            return { previousList }
+        },
+        onError: (err) => {
+            toast({type: 'error', message: "Error deleting skill, please try again later"});
+            console.error(err);
+        }
+    })
+
+    const { mutate: addToSkillList } = useMutation({
+        mutationFn: (skill: SkillsItem) => addUserSkill(skill),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['skills'] })
+            toast({type:'success', message: "Skill added successfully"})
+        },
+        onMutate: async (skill: SkillsItem) => {
+            await queryClient.cancelQueries({ queryKey: ['skills'] })
+            const previousList = await queryClient.getQueryData(['skills'])
+            queryClient.setQueryData<Skills[]>(['skills'], (old) => {
+                return old ? [...old, {
+                    ...skill,
+                    skill_id: "temporary",
+                    name: skill.skillName,
+                    years_of_experience: skill.yearsOfExperienceInt,
+                    skill_category: skill.skillCategory,
+                    proficiency: skill.proficiency,
+                    description: skill.description,
+                    created_at: new Date().toISOString()
+                } as Skills] : []
+            })
+            return { previousList }
+        },
+        onError: (err) => {
+            toast({type: 'error', message: "Error deleting skill, please try again later"});
+            console.error(err);
+        }
+    })
+
+    const { mutate: updateSkillDetails } = useMutation({
+        mutationFn: (skill: SkillsItem) => updateUserSkill(skill),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['skills'] })
+            toast({type:'success', message: "Skill updated successfully"})
+        },
+        onMutate: async (skill: SkillsItem) => {
+            await queryClient.cancelQueries({ queryKey: ['skills'] })
+            const previousList = await queryClient.getQueryData(['skills'])
+            queryClient.setQueryData<Skills[]>(['skills'], (old) => {
+                return old ? old.map(skillCard => { 
+                    if (skillCard.skill_id === skill.skillId) {
+                        return {
+                            ...skillCard,
+                            name: skill.skillName as string,
+                            years_of_experience: skill.yearsOfExperienceInt,
+                            skill_category: skill.skillCategory as string,
+                            type: skill.type as string,
+                            proficiency: skill.proficiency as string,
+                            description: skill.description as string
+                        };
+                    }
+                    return skillCard;
+                }) : []
+            })
+            return { previousList }
+        },
+        onError: (err) => {
+            toast({type: 'error', message: "Error updating skill, please try again later"});
+            console.error(err);
+        }
+    })
 
     const [filteredSkills, setFilteredSkills] = useState<Skills[]>([]);
 
@@ -107,44 +175,25 @@ export default function SkillsPage() {
             const existingDetailStr = userSkillModal?.getAttribute('data-experience-detail');
             if (existingDetailStr) {
                 const existingDetail = JSON.parse(existingDetailStr);
-                const skillUpdateResponse = await axios.put(`/api/skills/updateSkill/${existingDetail.skill_id}`, {
+                updateSkillDetails({
+                    skillId: existingDetail.skill_id,
                     skillName,
                     yearsOfExperienceInt,
                     type,
                     skillCategory,
                     proficiency,
                     description
-                });
-    
-                setSkills(prev => 
-                    prev.map(skill => 
-                        skill.skill_id === existingDetail.skill_id 
-                        ? skillUpdateResponse.data 
-                        : skill
-                    )
-                );
-                forceReRender(prev => prev + 1);
+                })
             } else {
-                const response = await axios.post("/api/skills/addSkill", {
+                addToSkillList({
                     skillName,
                     yearsOfExperienceInt,
                     type,
                     skillCategory,
                     proficiency,
-                    description,
-                    email
-                });
-    
-                setSkills([...skills, response.data]);
-                forceReRender(prev => prev + 1);
-                toast({type:'success', message: "Skill added successfully"})
+                    description
+                })    
             }
-    
-            const skillModal = document.getElementById('skill-modal');
-            if (skillModal) {
-                (skillModal as HTMLDialogElement).close();
-            }
-    
         } catch (err) {
             toast({type: 'error', message: "Error updating experience, please try again later"});
             console.error(err);
@@ -189,19 +238,12 @@ export default function SkillsPage() {
     async function handleConfirmedDelete() {
         const modal = document.getElementById('delete-modal');
         if (!modal) return;
+        (modal as HTMLDialogElement).close();
 
         const skillId = modal.getAttribute('data-experience-id');
         if (!skillId) return;
 
-        try {
-            const response = await axios.delete(`/api/skills/deleteSkill/${skillId}`);
-            setSkills(response.data);
-            forceReRender(prev => prev + 1);
-            (modal as HTMLDialogElement).close();
-        } catch (err) {
-            toast({type: 'error', message: "Error deleting experience, please try again later"});
-            console.error(err);
-        }
+        removeUserSkill(skillId as string);
     }
 
 

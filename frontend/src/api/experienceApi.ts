@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "../components/toast";
 
-export interface WorkExperienceItem {
+export interface WorkExperienceItem { // object im receiving from the backend
     experience_id: string,
     title: string,
     company: string,
@@ -11,7 +11,7 @@ export interface WorkExperienceItem {
     description: string
 }
 
-export interface ExperienceItem {
+export interface ExperienceItem { //object im sending to the backend
     experience_id?: string,
     title: FormDataEntryValue | null,
     company: FormDataEntryValue | null,
