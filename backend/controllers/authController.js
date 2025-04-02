@@ -380,7 +380,7 @@ export const resetPassword = async (req, res, next) => {
             let tokens = jwtTokens(user[0])
             res.cookie("refreshToken", tokens.refreshToken, {
                 httpOnly: true,
-                secure: HTTPS, // Only use HTTPS in production
+                secure: process.env.NODE_ENV === 'production', // Only use HTTPS in production
                 sameSite: 'strict', // Helps prevent CSRF attacks
                 maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days in milliseconds (matching JWT expiry)
                 });
