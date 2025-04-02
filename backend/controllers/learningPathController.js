@@ -1,46 +1,39 @@
 import { generateLearningPath } from "../utils/pathGenerator.js"
-const workExperience = [
-  {
-    company: "XYZ Corp",
-    title: "Senior Software Engineer",
-    duration: "23/10/2002 - 12/12/2007",
-    description: "created websites in php and debugged"
-  },
-  {
-    company: "Google",
-    title: "Senior Software Engineer",
-    duration: "23/10/2010 - 12/12/2022",
-    description: "created backend with flask"
-  }
-];
+import { sql } from "../config/db.js"
 
-const skills = [
-  {
-    name: "php",
-    yearsOfExperience: 5,
-    proficiency: "Advanced"
-  },
-  {
-    name: "Python",
-    yearsOfExperience: 3,
-    proficiency: "Intermediate"
-  }
-];
-
-// Main function call with result handling
-// (async () => {
-//   try {
-//     const learningPath = await generateLearningPath("react", "Technical Skills", "1 week to a month", skills, workExperience);
-//     console.log(JSON.stringify(learningPath, null, 2)); // Pretty print the JSON for readability
-//   } catch (error) {
-//     console.error("Failed to generate learning path:", error);
-//   }
-// })();
 
 export const createPath = async (req, res) => {
   try {
-    const generatedPath = await generateLearningPath()
-    res.status(200).json(generatedPath);
+    console.log(1)
+    const { skillName, category, useSkills, useExperience, email } = req.body;
+    if (!skillName || !category) {
+      return res.status(400).json({ error: "Missing required fields: skillName and category are required" });
+    }
+
+    const user = await sql `SELECT user_id FROM users WHERE email = ${email}`;
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const { user_id } = user[0];
+    let skills = []
+    if (useSkills) {
+      skills = await sql `SELECT name, years_of_experience, proficiency FROM skills
+                        WHERE user_id = ${user_id}`;
+    }
+
+    let experience = []
+    if (useExperience) {
+      experience = await sql `SELECT company, title, start_date, end_date FROM work_experience
+                            WHERE user_id = ${user_id}`;
+    }
+    console.log(2)
+    const generatedPath = await generateLearningPath({skillName, category, skills, experience})
+    console.log("\n\n", generatedPath, "\n\n\n")
+    await sql `INSERT INTO learning_paths
+              (user_id, path, skill_category, name) VALUES (${user_id}, ${generatedPath}, ${category}, ${skillName})`;
+    console.log(4)
+    res.status(201)
   } catch (error) {
     console.error(error);
     throw new Error("Failed to generate learning path");

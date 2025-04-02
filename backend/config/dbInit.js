@@ -52,6 +52,14 @@ const initDB = async () => {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             )`;
 
+        await sql`
+            CREATE TABLE IF NOT EXISTS learning_paths (
+                learning_path_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+                user_id uuid REFERENCES users(user_id) ON DELETE CASCADE,
+                name VARCHAR(255) NOT NULL,
+                skill_category VARCHAR(50) NOT NULL,
+                path JSONB NOT NULL
+                )`;
         console.log("Database initialized successfully!");
     } catch (err) {
         console.error("Failed to initialize database:", err);

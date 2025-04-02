@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import "dotenv/config";
 
-export const generateLearningPath = async (skillName, category, timeframe, considerSkills, considerExperience) => {
+export const generateLearningPath = async (path) => {
   const resourcePriorities = {
     'Technical Skills': 'Scrimba > freeCodeCamp > Codecademy > YouTube',
     'Design Skills': 'Figma Learn > Adobe Tutorials > Behance > Dribbble',
@@ -40,11 +40,11 @@ export const generateLearningPath = async (skillName, category, timeframe, consi
     'Soft Skills': 'Include real-world application scenarios'
   };
 
-  const skillsInfo = considerSkills ? 
-    `Consider user's existing skills: ${considerSkills.map(s => `${s.name} (${s.proficiency}, ${s.yearsOfExperience} years)`).join(', ')}. ` : '';
+  const skillsInfo = path.skills.length > 0 ? 
+    `Consider user's relevant existing skills: ${path.skills.map(s => `${s.name} (${s.proficiency}, ${s.yearsOfExperience} years)`).join(', ')}. ` : '';
   
-  const experienceInfo = considerExperience ? 
-    `Consider user's work experience: ${considerExperience.map(e => `${e.title} at ${e.company} (${e.duration}): ${e.description}`).join('; ')}. ` : '';
+  const experienceInfo = path.experience.length > 0 ? 
+    `Consider user's relevant work experience: ${path.experience.map(e => `${e.title} at ${e.company} (${e.start_date} - ${e.end_date})`).join('; ')}. ` : '';
 
   const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY
@@ -66,7 +66,7 @@ export const generateLearningPath = async (skillName, category, timeframe, consi
     messages: [
       {
         role: "user",
-        content: `Create a ${skillName} learning path for ${category} with the following structure:
+        content: `Create a ${path.skillName} learning path for ${path.category} with the following structure:
         
         {
           "title": (string),
@@ -74,7 +74,7 @@ export const generateLearningPath = async (skillName, category, timeframe, consi
             {
               "order": (number),
               "title": (string),
-              "type": (either "theory" or "practice"),
+              "type": (either "Theory" or "Practice"),
               "resources": { 
                 "free": [{"title": (string), "url": (string)}],
                 "paid": [{"title": (string), "url": (string)}]
@@ -83,20 +83,13 @@ export const generateLearningPath = async (skillName, category, timeframe, consi
                 "objective": (string),
                 "deliverables": [(string array)]
               },
-              "estimatedHours": (number),
-              "checklist": [(string array of 5-7 items max)]
+              "checklist" (if type is theory): [(string array of 5-7 items max)]
             }
           ],
-          "meta": {
-            "id": (uuid string),
-            "totalSteps": (number),
-            "totalHours": (number),
-            "timeframe": "${timeframe}",
-            "keyConcepts": [(string array of 5-10 items max)]
-          }
+          "keyConcepts": [(string array of 7 items max)]
         }
         
-        Create 4-6 phases total to ensure the response fits within limits. Include 'practiceDetails' only for practice type phases. Include your best resources based on these priorities: ${resourcePriorities[category] || 'high-quality, reputable sources'}.
+        Create 4-6 phases total to ensure the response fits within limits. Include 'practiceDetails' only for practice type phases. Include your best resources based on these priorities: ${resourcePriorities[path.category] || 'high-quality, reputable sources'}.
         
         ${skillsInfo}${experienceInfo}`
       }
