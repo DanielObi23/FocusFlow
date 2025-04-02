@@ -68,7 +68,20 @@ export const deletePath = async (req, res) => {
 }
 
 export const completePath = async (req, res) => {
-  // get the skill_category and name from learning_paths from id
-  // update the skill list in skills
-  // delete the path from learning paths from id
+  try {
+    const { id } = req.params;
+    const skillDetails = await sql`SELECT skill_category, name, user_id FROM learning_paths WHERE learning_path_id = ${id}`;
+    if (skillDetails.length === 0) {
+      return res.status(404).json({ error: "Learning path not found" });
+    }
+    const { skill_category, name, user_id } = skillDetails[0];
+    await sql`INSERT INTO skills
+              (user_id, skill_category, name, years_of_experience, type, proficiency)
+              VALUES (${user_id}, ${skill_category}, ${name}, ${0}, ${'professional'}, ${'beginner'})`;
+    await sql`DELETE FROM learning_paths WHERE learning_path_id = ${id}`;
+    res.status(200).json({ success: true, message: "Learning path completed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to complete learning path" });
+  }
 }

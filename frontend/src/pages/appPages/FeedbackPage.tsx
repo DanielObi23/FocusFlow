@@ -1,8 +1,16 @@
 import AppSideBar from "../../components/ProfileSection/AppSideBar";
 import axios from "axios";
 import toast from "../../components/toast";
+import { useRef, useEffect } from "react";
 
 export default function Feedback() {
+    const feedbackPage = useRef(null);
+    useEffect(() => {
+        if (feedbackPage.current) {
+            (feedbackPage.current as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+        }
+        }, []);
+
     async function handleSubmit(formData: FormData) {
         try {
             const subject = formData.get("subject");
@@ -24,7 +32,7 @@ export default function Feedback() {
     }
     return (
         <AppSideBar>
-            <div className="container mx-auto mt-10 md:mt-20 px-4 py-8 w-full">
+            <div ref={feedbackPage} className="container mx-auto mt-10 md:mt-20 px-4 py-8 w-full">
                 <div className="flex flex-col justify-center items-center border-4 w-full sm:w-5/6 md:w-3/4 lg:w-2/3 mx-auto p-4 sm:p-6 md:p-8 lg:p-12">
                     <h1 className="text-3xl sm:text-2xl md:text-5xl lg:text-5xl font-bold text-center mb-6 w-full">Message FocusFlow Team</h1>
                     

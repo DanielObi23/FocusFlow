@@ -44,7 +44,7 @@ export const getPaths = async () => {
     return response.data
 }
 
-export const deletePathDetails = async (id: string) => {
+export const deletePath = async (id: string) => {
     const response = await axios.delete(`/api/ai/deletePath/${id}`)
     return response.data
 }

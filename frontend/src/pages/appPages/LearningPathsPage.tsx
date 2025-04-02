@@ -4,8 +4,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { generatePath, getPaths, Path } from "../../api/pathsApi"
 import TruckLoader from "../../components/TruckLoader"
 import toast from "../../components/toast";
+import { useRef, useEffect } from "react";
 
 export default function LearningPathsPage() {
+    const learningPathsPage = useRef(null);
+    useEffect(() => {
+        if (learningPathsPage.current) {
+            (learningPathsPage.current as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+        }
+        }, []);
+    
     const queryClient = useQueryClient();
     const { data: learningPaths, isLoading, error } = useQuery({
         queryKey: ['learningPaths'],
@@ -13,6 +21,7 @@ export default function LearningPathsPage() {
         staleTime: Infinity,
         retry: 4
     })
+
     if (error) toast({type:'error', message: "Error fetching learning paths"});
 
     const { mutate: createPath, isPending: isPathCreationPending } = useMutation({
@@ -37,14 +46,15 @@ export default function LearningPathsPage() {
 
     return (
         <AppSideBar>
-            { isLoading ? <TruckLoader /> : <div className="p-5 flex flex-col gap-4">
+            { isLoading ? <TruckLoader /> : <div className="p-5 flex flex-col gap-4 z-0 relative">
 
                 {isPathCreationPending? 
                 <button className="btn text-2xl text-bold py-10 text-accent" disabled>Generating path...</button> : 
-                <button className="btn text-2xl text-bold py-10" onClick={()=>{
+                (learningPaths.length < 5 ? <button ref={learningPathsPage} className="btn text-2xl text-bold py-10" onClick={()=>{
                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
                     dialog?.showModal();
-                }}>Generate path</button>}
+                }}>Generate path</button>
+                : <button ref={learningPathsPage} className="btn text-2xl text-bold py-10" disabled>Maximum 5 learning paths reached</button>)}
 
                 <dialog id='gen_learning_path' className="modal">
                     <div className="modal-box w-full">
