@@ -3,7 +3,7 @@ import { FaInfo } from "react-icons/fa";
 import toast from "../../toast";
 import WorkExperience from "./WorkExperience";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getUserExperience, deleteUserExperience, editUserExperience, addUserExperience, WorkExperienceItem, ExperienceItem } from "../../../api/ExperienceApi"
+import { getUserExperience, deleteUserExperience, editUserExperience, addUserExperience, WorkExperienceItem, ExperienceItem } from "../../../api/workExperienceApi"
 import TruckLoader from "../../TruckLoader";
 
 export default function ExperienceSection() {

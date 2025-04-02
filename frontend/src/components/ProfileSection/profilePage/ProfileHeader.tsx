@@ -26,6 +26,7 @@ export default function ProfileHeader() {
         mutationFn: (profile: UserProfile) => updateUserProfile(profile),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+            queryClient.invalidateQueries({ queryKey: ["profileImage"] });
         },
         onMutate: async (newProfile) => {
             await queryClient.cancelQueries({ queryKey: ["userProfile"] })
@@ -64,8 +65,7 @@ export default function ProfileHeader() {
                         first_name: firstName, 
                         last_name: lastName, 
                         phone_number: phoneNumber
-                    })                            
-                    queryClient.invalidateQueries({ queryKey: ['profileImage'] });        
+                    })                                   
                 }
             } else if (image instanceof File && image.name.length === 0) {
                 const imageUrl = userProfile.profile_image_url

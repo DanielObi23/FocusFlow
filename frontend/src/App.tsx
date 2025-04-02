@@ -20,7 +20,6 @@ const Logout = lazy(() => import('./pages/authPages/LogoutPage'));
 // App Pages
 const ProfilePage = lazy(() => import('./pages/appPages/ProfilePage'));
 const SkillsPage = lazy(() => import('./pages/appPages/SkillsPage'));
-const AchievementPage = lazy(() => import('./pages/appPages/AchievementPage'));
 const FeedbackPage = lazy(() => import('./pages/appPages/FeedbackPage'));
 const LearningPathsPage = lazy(() => import('./pages/appPages/LearningPathsPage'));
 
@@ -55,7 +54,6 @@ function AppLayout() {
             <Route path="/" element={<ProfilePage />} />
             <Route path="/skills" element={<SkillsPage />} />
             <Route path="/learning-paths" element={<LearningPathsPage />} />
-            <Route path="/achievements" element={<AchievementPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/logout" element={<Logout />} />
           </Route>

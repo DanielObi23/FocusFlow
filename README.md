@@ -1,20 +1,17 @@
-# FocusFlow Mini
+# FocusFlow
 
-An intelligent skill learning path generator with comprehensive task tracking capabilities.
+An intelligent skill learning path generator.
 
 ## Overview
 
-FocusFlow Mini helps users develop new skills by creating personalized learning paths with step-by-step guidance. The application breaks down complex skills into manageable tasks, provides timeline estimates, and tracks progress toward completion.
+FocusFlow helps users develop new skills by creating personalized learning paths with step-by-step guidance. The application breaks down complex skills into manageable tasks qnd lets users record their skills and work experience
 
 ## Key Features
 
-- **Intelligent Path Generation**: AI-powered breakdown of any skill into actionable learning steps
-- **Comprehensive Task Organization**: Hierarchical view of learning paths with detailed step breakdowns
-- **Smart Learning Suggestions**: Get personalized recommendations for next steps and projects
-- **Progress Tracking**: Dashboard to visualize skill development progress
-- **User Authentication**: Secure login via Google OAuth or email/password
-- **Skill Management**: Import skills from LinkedIn or create custom skill profiles
-- **Milestone Celebrations**: Recognize significant progress achievements
+- **Intelligent Path Generation**: AI-powered personalized breakdown of any skill into actionable learning steps
+- **Skill record**: Section to manage your list of skills
+- **User Authentication**: Secure login via JWT tokens email/password
+- **Work experience record**: Section to manage your work history
 
 ## Tech Stack
 
@@ -23,6 +20,7 @@ FocusFlow Mini helps users develop new skills by creating personalized learning 
 - Tailwind CSS for styling
 - React Router for navigation
 - Daisy UI component library
+- TanStack query v5 for state management and client-side caching
 
 ### Backend
 - Node.js with Express.js
@@ -30,19 +28,17 @@ FocusFlow Mini helps users develop new skills by creating personalized learning 
 - localStorage for caching
 - JWT for secure API access
 - arcject for rate-limiting, bot detection and request filtering
+- AWS S3 for profile image storage
 
 ### Database
 - PostgreSQL using neon serverless database (for free hosting)
 
 ### Integrations
-- OpenAI/Claude API for learning path generation
-- LinkedIn API for skill import
-- Google OAuth for authentication
+- Claude API for learning path generation
 
 ### DevOps
 - Git/GitHub for version control
 - Vercel/Railway for deployment
-- CI/CD pipeline for automated testing and deployment
 
 ## Installation
 
@@ -55,18 +51,18 @@ FocusFlow Mini helps users develop new skills by creating personalized learning 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/focusflow-mini.git
-cd focusflow-mini
+git clone https://github.com/yourusername/FocusFlow.git
+cd FocusFlow
 ```
 
 2. Install dependencies:
 ```bash
 # Install backend dependencies
-cd server
+cd backend
 npm install
 
 # Install frontend dependencies
-cd ../client
+cd ../frontend
 npm install
 ```
 
@@ -74,109 +70,69 @@ npm install
    - Create `.env` files in both server and client directories
    - Configure the following variables:
 
-**Server .env:**
+**Backend .env:**
 ```
-DATABASE_URL="postgresql://user:password@localhost:5432/focusflow"
-JWT_SECRET="your-jwt-secret"
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-OPENAI_API_KEY="your-openai-api-key"
-LINKEDIN_CLIENT_ID="your-linkedin-client-id"
-LINKEDIN_CLIENT_SECRET="your-linkedin-client-secret"
-PORT=8000
+PORT=3000
+DATABASE_URL="noen database url"
+
+ARCJET_KEY="arcjet key"
+
+ACCESS_TOKEN_SECRET="access token secret"
+REFRESH_TOKEN_SECRET="refresh token secret"
+
+TWILIO_ACCESS_CODE="code"
+SENDGRID_API_KEY="your sendgrid api key"
+SENDGRID_EMAIL="your sendgrid email"
+MY_EMAIL="your email"
+
+AWS_ACCESS_KEY="access key"
+AWS_SECRET_ACCESS_KEY="secret access key"
+AWS_REGION="your region"
+AWS_BUCKET_NAME="your bucket name"
+
+ANTHROPIC_API_KEY="your claude api key"
 ```
 
 **Client .env:**
 ```
-REACT_APP_API_URL="http://localhost:8000/api"
-REACT_APP_GOOGLE_CLIENT_ID="your-google-client-id"
+REACT_APP_API_URL="http://localhost:{your port}/"
 ```
 
-4. Database setup:
-```bash
-cd server
-npx prisma migrate dev
-```
-
-5. Start the development servers:
+4. Start the development servers:
 ```bash
 # Start backend server
-cd server
-npm run dev
+cd backend
+nodemon server.js
 
 # Start frontend server in a new terminal
-cd client
+cd frontend
 npm run dev
 ```
 
 ## Usage
 
-1. Register a new account or log in with Google
-2. Create a new learning path by entering your skill goal
-3. Customize the generated learning path as needed
-4. Track your progress through the dashboard
-5. Complete steps and celebrate milestones
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login with email/password
-- `GET /api/auth/google` - Initiate Google OAuth flow
-- `GET /api/auth/me` - Get current user info
-
-### Skills
-- `GET /api/skills` - Get all user skills
-- `POST /api/skills` - Create a new skill
-- `POST /api/skills/import-linkedin` - Import LinkedIn skills
-
-### Learning Paths
-- `GET /api/paths` - Get all learning paths
-- `POST /api/paths` - Create a new learning path
-- `GET /api/paths/:id/steps` - Get all steps for a path
-
-### Smart Features
-- `GET /api/suggestions` - Get smart suggestions for user
-- `POST /api/ai/generate-path` - Generate learning path steps
-
-For a complete list of endpoints, refer to the API documentation.
+1. Register a new account
+2. Set up your profile
+3. Add current skills in skills page
+4. Generate learning paths for the desired skill
+5. Complete steps, after path completion, the skill will automatically be added to your skill list
 
 ## Development
 
-### Project Structure
+### Database Schema and api endpoints
 ```
 /
-├── client/                   # Frontend React application
-│   ├── public/               # Static files
-│   └── src/
-│       ├── components/       # React components
-│       ├── pages/            # Page components
-│       ├── hooks/            # Custom hooks
-│       ├── services/         # API services
-│       └── utils/            # Utility functions
+├── backend/                   
+│   ├── config/
+|   |     ├── db.js/        # neon database
+│   |     └── dbInit.js/    # database schema
+│   ├── controllers/
+│   ├── lib/       
+│   ├── middleware/
+|   ├── node_modules/       
+│   ├── routes/            # API routes
 │
-└── server/
-    ├── prisma/               # Prisma schema and migrations
-    ├── src/
-    │   ├── controllers/      # Route controllers
-    │   ├── middleware/       # Express middleware
-    │   ├── routes/           # API routes
-    │   ├── services/         # Business logic
-    │   └── utils/            # Utility functions
-    └── tests/                # Backend tests
 ```
-
-### Database Schema
-
-The application uses a relational database with the following main entities:
-- Users
-- Skills
-- Learning Paths
-- Path Steps
-- Step Details
-- Smart Suggestions
-- Milestones
-- User Preferences
 
 ## Deployment
 
@@ -211,6 +167,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- OpenAI/Claude for AI capabilities
-- shadcn UI for component library
-- The entire open-source community
+- Claude for AI capabilities
+- Daisy UI for component library
