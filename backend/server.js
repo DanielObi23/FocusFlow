@@ -3,26 +3,37 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+import initDB from "./config/dbInit.js";
+import { aj, ajStrict } from "./lib/arcjet.js"
+import {sql} from "./config/db.js"
+
+import learningPathRoutes from "./routes/learningPathRoutes.js"
+import experienceRoutes from "./routes/experienceRoutes.js"
 import authRoutes from "./routes/authRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
-import initDB from "./config/dbInit.js";
-import { aj, ajStrict } from "./lib/arcjet.js"
-import learningPathRoutes from "./routes/learningPathRoutes.js"
-import experienceRoutes from "./routes/experienceRoutes.js"
-import {sql} from "./config/db.js"
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+app.use(express.static(path.join(__dirname, "../frontend/dist")))
 
 const corsOptions = { credentials: true, origin: process.env.URL || "*" };
-
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
 app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, "../frontend/dist")))
 
 // applying arcjet rate limiting, shield and bot detection to all routes
 app.use("/api", async (req, res, next) => {
@@ -131,6 +142,10 @@ app.delete('/api/delete-account/:email', async (req, res) => {
         console.error(err);
         res.status(500).json({message: "Server error"})
     }
+})
+
+app.get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"))
 })
 
 initDB().then(() => {

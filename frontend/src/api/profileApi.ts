@@ -25,6 +25,8 @@ export const getUserData = async() => {
     if (!email) {
         throw new Error("Email is required");
     }
+
+    console.log("getting user data...");
     
     const response = await axios.get(`/api/profile/userProfile/${email}`);
     return response.data;  
