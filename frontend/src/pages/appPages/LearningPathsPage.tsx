@@ -18,15 +18,21 @@ export default function LearningPathsPage() {
     const { mutate: createPath, isPending: isPathCreationPending } = useMutation({
         mutationFn: (formData: FormData) => generatePath(formData),
         onSuccess: () => {
-            const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
-            dialog?.close();
-            queryClient.refetchQueries({queryKey: ['learningPaths']});
+            queryClient.invalidateQueries({queryKey: ['learningPaths']});
             toast({type:'success', message: "Learning Path generated successfully!"});
-        }
+        },
+        onError: (error) => {
+            toast({ type: 'error', message: "Failed to generate path" });
+            console.error(error);
+        },
     }) 
 
     const paths = learningPaths?.map((skillPath: Path) => (
-        <SkillToLearn key={skillPath.learning_path_id} path={skillPath.path} />
+        <SkillToLearn 
+            key={skillPath.learning_path_id} 
+            learning_path_id={skillPath.learning_path_id} 
+            path={skillPath.path} 
+        />
     ));
 
     return (
@@ -67,7 +73,7 @@ export default function LearningPathsPage() {
                             </fieldset>
 
                             <div className="flex items-center space-x-2">
-                                <input type="checkbox" defaultChecked className="checkbox" name="use_skills" id="use_skills"/>
+                                <input type="checkbox" className="checkbox" name="use_skills" id="use_skills"/>
                                 <label htmlFor="use_skills" className="text-sm">Consider Your Skills</label>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -79,7 +85,10 @@ export default function LearningPathsPage() {
                                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
                                     dialog?.close();
                                 }}>cancel</button>
-                                <button type="submit" className="btn">submit</button>
+                                <button type="submit" className="btn" onClick={()=>{
+                                    const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
+                                    dialog?.close();
+                                }}>submit</button>
                             </div>
                         </form>
                     </div>

@@ -19,7 +19,7 @@ export default function skillPhase(step: phase) {
             <th className="text-base">{step.type}</th>
             <td colSpan={2}>
                 <div className="flex flex-col gap-2.5 justify-center items-center">
-                    <h1 className="flex gap-1 items-center text-lg font-semibold">{step.title}</h1>
+                    <h1 className="text-lg font-semibold text-center">{step.title}</h1>
                     <div className="collapse bg-base-100 border-base-300 border w-5/7">
                         <input type="checkbox" />
                         <div className="collapse-title font-bold text-sm text-center">Objective</div>

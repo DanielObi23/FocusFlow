@@ -43,3 +43,13 @@ export const getPaths = async () => {
     const response = await axios.get(`/api/ai/getPaths/${email}`)
     return response.data
 }
+
+export const deletePathDetails = async (id: string) => {
+    const response = await axios.delete(`/api/ai/deletePath/${id}`)
+    return response.data
+}
+
+export const completePath = async (id: string) => {
+    const response = await axios.post(`/api/ai/completePath/${id}`)
+    return response.data
+}
