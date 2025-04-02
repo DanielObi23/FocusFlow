@@ -8,11 +8,12 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 import initDB from "./config/dbInit.js";
-import { aj, ajStrict } from "./lib/arcjet.js"
-import {sql} from "./config/db.js"
+import { aj, ajStrict } from "./lib/arcjet.js";
+import {sql} from "./config/db.js";
+import sendEmail from "./utils/sendEmail.js";
 
-import learningPathRoutes from "./routes/learningPathRoutes.js"
-import experienceRoutes from "./routes/experienceRoutes.js"
+import learningPathRoutes from "./routes/learningPathRoutes.js";
+import experienceRoutes from "./routes/experienceRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
