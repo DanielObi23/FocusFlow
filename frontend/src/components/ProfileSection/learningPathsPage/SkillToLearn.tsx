@@ -33,7 +33,10 @@ export default function SkillToLearn({learning_path_id, path}: Path) {
         mutationFn: (id: string) => completePath(id),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [['learningPaths'], ['skills']],
+                queryKey: ['learningPaths'],
+            })
+            queryClient.invalidateQueries({
+                queryKey: ['skills'],
             })
             toast({ type: 'success', message: "Skill successfully added to your list" });
         },
@@ -60,8 +63,6 @@ export default function SkillToLearn({learning_path_id, path}: Path) {
         console.log("Completing path with ID:", learning_path_id);
         completePathDetails(learning_path_id as string);
     }
-
-    // do the same but for complete, toast on success, skill added to user skill list. optimistic delete from
 
     return (
         <div className="collapse bg-secondary border border-base-300">
@@ -147,7 +148,7 @@ export default function SkillToLearn({learning_path_id, path}: Path) {
             <dialog id={`complete-modal-${learning_path_id}`} className="modal">
                 <div className="modal-box w-full">
                     <div className="flex flex-col gap-2.5">
-                        <p className="text-lg text-primary">Are you sure you have completed each task?</p>
+                        <p className="text-lg text-primary">Are you sure you have completed every task?</p>
                         <p className="text-sm text-gray-600">This action cannot be undone.</p>
                     </div>
                     <div className="w-full flex justify-between mt-4">

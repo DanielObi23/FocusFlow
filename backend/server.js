@@ -10,6 +10,7 @@ import initDB from "./config/dbInit.js";
 import { aj, ajStrict } from "./lib/arcjet.js"
 import learningPathRoutes from "./routes/learningPathRoutes.js"
 import experienceRoutes from "./routes/experienceRoutes.js"
+import {sql} from "./config/db.js"
 
 dotenv.config();
 const app = express();
@@ -108,6 +109,24 @@ app.post('/api/sendFeedback', async (req, res) => {
             name: "user"
         })
         res.status(200).json({message: "Feedback sent"})
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Server error"})
+    }
+})
+
+app.delete('/api/delete-account/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const user = await sql `SELECT user_id FROM users WHERE email = ${email}`;
+        if (user.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const userId = user[0].user_id;
+        await sql`
+            DELETE FROM users
+            WHERE user_id = ${userId}`;
+        res.status(200).json({message: "Account deleted"})
     } catch (err) {
         console.error(err);
         res.status(500).json({message: "Server error"})

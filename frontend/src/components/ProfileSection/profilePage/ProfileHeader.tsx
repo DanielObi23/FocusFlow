@@ -64,8 +64,8 @@ export default function ProfileHeader() {
                         first_name: firstName, 
                         last_name: lastName, 
                         phone_number: phoneNumber
-                    })                     
-                    queryClient.invalidateQueries({ queryKey: ['profileImage'] }); // changing the profile in the header component                    
+                    })                            
+                    queryClient.invalidateQueries({ queryKey: ['profileImage'] });        
                 }
             } else if (image instanceof File && image.name.length === 0) {
                 const imageUrl = userProfile.profile_image_url
