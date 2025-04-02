@@ -241,7 +241,7 @@ export const forgotPassword = async (req, res, next) => {
             password_reset_expires = ${passwordResetExpires}
             WHERE user_id = ${user[0].user_id}`;
         // sending the plain password reset token to user and saving the encrypted token in database
-        const resetUrl = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
         try {
             await sendEmail({
               email: user[0].email,
@@ -380,7 +380,7 @@ export const resetPassword = async (req, res, next) => {
             let tokens = jwtTokens(user[0])
             res.cookie("refreshToken", tokens.refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // Only use HTTPS in production
+                secure: HTTPS, // Only use HTTPS in production
                 sameSite: 'strict', // Helps prevent CSRF attacks
                 maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days in milliseconds (matching JWT expiry)
                 });
