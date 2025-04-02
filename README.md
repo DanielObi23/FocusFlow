@@ -72,7 +72,7 @@ npm install
 
 **Backend .env:**
 ```
-PORT=3000
+PORT="your desired port"
 DATABASE_URL="noen database url"
 
 ARCJET_KEY="arcjet key"
@@ -91,11 +91,6 @@ AWS_REGION="your region"
 AWS_BUCKET_NAME="your bucket name"
 
 ANTHROPIC_API_KEY="your claude api key"
-```
-
-**Client .env:**
-```
-REACT_APP_API_URL="http://localhost:{your port}/"
 ```
 
 4. Start the development servers:
