@@ -1,19 +1,39 @@
 import AppSideBar from "../../components/ProfileSection/AppSideBar"
 import SkillToLearn from "../../components/ProfileSection/learningPathsPage/SkillToLearn"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query" 
-import { generatePath } from "../../api/pathsApi"
+import { generatePath, getPaths, Path } from "../../api/pathsApi"
+import TruckLoader from "../../components/TruckLoader"
+import toast from "../../components/toast";
 
 export default function LearningPathsPage() {
+    const queryClient = useQueryClient();
+    const { data: learningPaths, isLoading, error } = useQuery({
+        queryKey: ['learningPaths'],
+        queryFn: getPaths,
+        staleTime: Infinity,
+        retry: 4
+    })
+    if (error) toast({type:'error', message: "Error fetching learning paths"});
 
-    const { mutate, isPending } = useMutation({
-        mutationFn: (formData: FormData) => generatePath(formData)
+    const { mutate: createPath, isPending: isPathCreationPending } = useMutation({
+        mutationFn: (formData: FormData) => generatePath(formData),
+        onSuccess: () => {
+            const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
+            dialog?.close();
+            queryClient.refetchQueries({queryKey: ['learningPaths']});
+            toast({type:'success', message: "Learning Path generated successfully!"});
+        }
     }) 
+
+    const paths = learningPaths?.map((skillPath: Path) => (
+        <SkillToLearn key={skillPath.learning_path_id} path={skillPath.path} />
+    ));
 
     return (
         <AppSideBar>
-            <div className="p-5 flex flex-col gap-4">
+            { isLoading ? <TruckLoader /> : <div className="p-5 flex flex-col gap-4">
 
-                {isPending? 
+                {isPathCreationPending? 
                 <button className="btn text-2xl text-bold py-10 text-accent" disabled>Generating path...</button> : 
                 <button className="btn text-2xl text-bold py-10" onClick={()=>{
                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
@@ -22,7 +42,7 @@ export default function LearningPathsPage() {
 
                 <dialog id='gen_learning_path' className="modal">
                     <div className="modal-box w-full">
-                        <form action={mutate} className="flex flex-col gap-4">
+                        <form action={createPath} className="flex flex-col gap-4">
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend text-base">What skill do you want to learn?</legend>
                                 <input type="text" className="input w-full" name="skill_name" placeholder="e.g React, Graphics Design, CopyWriting" required/>
@@ -59,10 +79,7 @@ export default function LearningPathsPage() {
                                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
                                     dialog?.close();
                                 }}>cancel</button>
-                                <button type="submit" className="btn" onClick={()=>{
-                                    const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
-                                    dialog?.close();
-                                }}>submit</button>
+                                <button type="submit" className="btn">submit</button>
                             </div>
                         </form>
                     </div>
@@ -70,11 +87,9 @@ export default function LearningPathsPage() {
 
                 <hr />
                 <div className="flex flex-col gap-3">
-                    <SkillToLearn />
-                    <SkillToLearn />
-                    <SkillToLearn />
+                    {paths}
                 </div>
-            </div>
+            </div>}
         </AppSideBar>
         )
 }

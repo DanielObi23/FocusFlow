@@ -39,3 +39,19 @@ export const createPath = async (req, res) => {
     throw new Error("Failed to generate learning path");
   }
 }
+
+export const getPaths = async (req, res) => {
+  try {
+    const user = await sql `SELECT user_id FROM users WHERE email = ${req.params.email}`;
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const { user_id } = user[0];
+    const paths = await sql`SELECT path, learning_path_id FROM learning_paths WHERE user_id = ${user_id}`;
+    res.status(200).json(paths);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to get learning paths");
+  }
+}
