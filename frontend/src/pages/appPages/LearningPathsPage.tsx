@@ -49,7 +49,7 @@ export default function LearningPathsPage() {
             { isLoading ? <TruckLoader /> : <div className="p-5 flex flex-col gap-4 z-0 relative">
 
                 {isPathCreationPending? 
-                <button className="btn text-2xl text-bold py-10 text-accent" disabled>Generating path...</button> : 
+                <button className="btn text-2xl text-bold py-10 text-accent" disabled>Generating path<span className="loading loading-dots loading-xl mt-4"></span></button> : 
                 (learningPaths.length < 5 ? <button ref={learningPathsPage} className="btn text-2xl text-bold py-10" onClick={()=>{
                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
                     dialog?.showModal();
@@ -57,7 +57,7 @@ export default function LearningPathsPage() {
                 : <button ref={learningPathsPage} className="btn text-2xl text-bold py-10" disabled>Maximum 5 learning paths reached</button>)}
 
                 <dialog id='gen_learning_path' className="modal">
-                    <div className="modal-box w-full">
+                    <div className="modal-box w-full my-3">
                         <form action={createPath} className="flex flex-col gap-4">
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend text-base">What skill do you want to learn?</legend>
@@ -91,7 +91,7 @@ export default function LearningPathsPage() {
                                 <label htmlFor="use_experience" className="text-sm">Consider Your Work Experience</label>
                             </div>
                             <div className="flex justify-between">
-                                <button className="btn" onClick={()=>{
+                                <button type="button" className="btn" onClick={()=>{
                                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;
                                     dialog?.close();
                                 }}>cancel</button>

@@ -7,6 +7,7 @@ import { fetchSkills, deleteUserSkill, Skills, addUserSkill, SkillsItem, updateU
 
 export default function SkillsPage() {
     const [searchItem, setSearchItem] = useState('')
+    const [skillNameExists, setSkillNameExists] = useState(false)
     const skillPage = useRef(null)
     
     const queryClient = useQueryClient();
@@ -249,14 +250,16 @@ export default function SkillsPage() {
 
     function getSkillList(category: string) {
         // I'm using filtered skills because the default value is equal to skills, when i start filtering, i want the filtered list to change but not the actual skill list
-        return {skills: filteredSkills
-                    .filter((skill: Skills) => skill.skill_category === category)
-                    .map((skill: Skills) => <SkillCard
-                                     key={skill.skill_id}
-                                     detail={skill} 
-                                     deleteSkill={deleteSkill}
-                                     handleEditSkill={editSKill}
-                                     />),
+        const filteredSkillsList = filteredSkills
+                                    .filter((skill: Skills) => skill.skill_category === category)
+                                    .sort((a, b) => a.name.localeCompare(b.name)) // sort by name
+                                    .map((skill: Skills) => <SkillCard
+                                                    key={skill.skill_id}
+                                                    detail={skill} 
+                                                    deleteSkill={deleteSkill}
+                                                    handleEditSkill={editSKill}
+                                                    />)
+        return {skills: filteredSkillsList,
                 categoryName: category
         }
     }
@@ -286,6 +289,15 @@ export default function SkillsPage() {
                     </div>
                 ));
     
+    // To avoid skill name duplicates
+    const skillNames = skills ? skills.map((skill: Skills) => skill.name.toLowerCase().trim()) : [];
+
+    const handleAddSkillName = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const skillName = e.target.value.toLowerCase();
+        setSkillNameExists(skillNames.includes(skillName));
+    }    
+
+
             
     return (
         <AppSideBar>
@@ -304,16 +316,31 @@ export default function SkillsPage() {
                             </label>
                             <button className="btn btn-sm md:btn-md btn-primary font-semibold" onClick={addSkill}>Add New Skill</button>
                             <dialog id='skill-modal' className="modal p-5">
-                                <div className="modal-box w-full">
+                                <div className="modal-box w-full my-2">
                                     <form action={handleSkill} className="flex flex-col gap-4 w-full">
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend text-base">Skill Name</legend>
-                                            <input type="text" className="input w-full validator" name="skill_name" maxLength={30} placeholder="e.g TypeScript, Adobe XD, Blender" required/>
+                                            <input 
+                                                type="text" 
+                                                className="input w-full validator" 
+                                                name="skill_name" 
+                                                maxLength={30} 
+                                                placeholder="e.g TypeScript, Adobe XD, Blender" 
+                                                onChange={handleAddSkillName}
+                                                required/>
+                                            {skillNameExists && <p className="text-error text-sm">This skill already exists.</p>}
                                         </fieldset>
                                         
                                         <fieldset className="fieldset">
                                             <legend className="fieldset-legend text-base">Years of Experience</legend>
-                                            <input type="number" name="years_of_experience" className="input w-full validator" placeholder="e.g. 3, 5, 10" min="0" max="90" required/>
+                                            <input 
+                                                type="number" 
+                                                name="years_of_experience" 
+                                                className="input w-full validator" 
+                                                placeholder="e.g. 3, 5, 10" 
+                                                min="0" 
+                                                max="90" 
+                                                required/>
                                             <p className="validator-hint">Must be between be 0 to 100</p>
                                         </fieldset>
 
@@ -408,7 +435,7 @@ export default function SkillsPage() {
                                                     (modal as HTMLDialogElement).close();
                                                 }
                                             }}>Cancel</button>
-                                            <button type="submit" className="btn">Save skill</button>
+                                            <button type="submit" className="btn" disabled={skillNameExists}>Save skill</button>
                                         </div>
                                     </form>
                                 </div>
