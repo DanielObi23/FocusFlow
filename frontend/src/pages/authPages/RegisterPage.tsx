@@ -5,6 +5,7 @@ import axios from "axios";
 
 export default function RegisterPage() {
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null);
   const createAccountRef = useRef<HTMLButtonElement>(null);
@@ -22,6 +23,12 @@ export default function RegisterPage() {
       return () => clearTimeout(timer);
     }
   }, [errorMessage]);
+
+  // Function to validate password
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    return passwordRegex.test(password);
+  };
 
   async function handleRegister(formData: FormData): Promise<void> {
     const email = formData.get("email") as string;
@@ -63,8 +70,19 @@ export default function RegisterPage() {
     } catch (error) {
       console.error("Error registering/verifying user:", error);
       setErrorMessage("Error creating account. Please try again later.");
+      if (createAccountRef.current) {
+        createAccountRef.current.disabled = false;
+        loadingRef.current?.classList.add("hidden");
+      }
     }
   }
+  
+  // Function to check password validity on input change
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    setIsPasswordValid(validatePassword(password));
+    checkPasswordsMatch();
+  };
   
   // Function to check if passwords match on input change
   const checkPasswordsMatch = () => {
@@ -184,7 +202,7 @@ export default function RegisterPage() {
                 pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
                 title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
                 className="w-full"
-                onChange={checkPasswordsMatch}
+                onChange={handlePasswordChange}
                 aria-required="true"
                 aria-describedby="password-hint"
               />
@@ -247,8 +265,8 @@ export default function RegisterPage() {
           <button 
             type="submit" 
             className="btn btn-primary w-full mt-6 font-bold"
-            disabled={!passwordsMatch}
-            aria-disabled={!passwordsMatch}
+            disabled={!passwordsMatch || !isPasswordValid}
+            aria-disabled={!passwordsMatch || !isPasswordValid}
             ref={createAccountRef}
           >
             Create Account

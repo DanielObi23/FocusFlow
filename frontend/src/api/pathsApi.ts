@@ -32,6 +32,7 @@ export const generatePath = async (formData: FormData) => {
     const response = await axios.post("/api/ai/createPath", {
         skillName: formData.get("skill_name"),
         category: formData.get("skill_category"),
+        preference: formData.get("preference"),
         useSkills: formData.has("use_skills"),
         useExperience: formData.has("use_experience"),
         email

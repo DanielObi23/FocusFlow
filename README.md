@@ -130,23 +130,12 @@ npm run dev
 ```
 
 ## Deployment
-
-### Frontend (Vercel)
-1. Connect your GitHub repository to Vercel
+2. Connect your GitHub repository to Render
 2. Configure build settings:
    - Build Command: `npm run build`
    - Output Directory: `build`
 3. Add environment variables
 4. Deploy
-
-### Backend (Railway)
-1. Connect GitHub repository
-2. Configure as Web Service:
-   - Build Command: `npm install`
-   - Start Command: `npm start`
-3. Add environment variables
-4. Set up PostgreSQL database instance
-5. Deploy
 
 ## Contributing
 

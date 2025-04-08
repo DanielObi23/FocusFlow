@@ -62,7 +62,11 @@ export const generateLearningPath = async (path) => {
             The JSON should start with '{' and end with '}'.
             Ensure your response is complete and not truncated.
             Keep responses concise to avoid hitting token limits.
-            There must be no repetitions in the JSON`,
+            There must be no repetitions in the JSON.
+            Prioritize high-quality, reputable and more recent resources.
+            Ensure all links are valid and accessible.
+            Avoid using the same resources multiple times.
+            ${path.preference? (path.preference !== 'video' && path.preference !== "both" ? 'Use text-based resources.' : 'Use video-based resources.') : ''}`,
     messages: [
       {
         role: "user",

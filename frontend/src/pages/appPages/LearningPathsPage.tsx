@@ -90,6 +90,21 @@ export default function LearningPathsPage() {
                                 <input type="checkbox" className="checkbox" name="use_experience" id="use_experience"/>
                                 <label htmlFor="use_experience" className="text-sm">Consider Your Work Experience</label>
                             </div>
+                            <fieldset className="space-y-2">
+                                <legend className="fieldset-legend text-base">Content preference:</legend>
+                                <div className="flex items-center gap-2">
+                                    <input type="radio" name="preference" className="radio" id="video" value={"video"} />
+                                    <label htmlFor="video" className="text-sm mr-4">Video</label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <input type="radio" name="preference" className="radio" id="text" value={"text"}/>
+                                    <label htmlFor="Text" className="text-sm mr-5">Text</label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <input type="radio" name="preference" className="radio" id="both" value={"both"} defaultChecked/>
+                                    <label htmlFor="Both" className="text-sm">Both</label>
+                                </div>
+                            </fieldset>
                             <div className="flex justify-between">
                                 <button type="button" className="btn" onClick={()=>{
                                     const dialog = document.getElementById('gen_learning_path') as HTMLDialogElement;

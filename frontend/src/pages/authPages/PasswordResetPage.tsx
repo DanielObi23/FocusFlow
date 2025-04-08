@@ -5,6 +5,7 @@ import axios from "axios";
 
 export default function PasswordResetPage() {
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const { token } = useParams();
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null);
@@ -43,6 +44,12 @@ export default function PasswordResetPage() {
     useEffect(() => {
         verifyToken();
     }, []);
+
+    // Function to validate password
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    return passwordRegex.test(password);
+  };
 
   async function handleReset(formData: FormData): Promise<void> {
     const password = formData.get("password") as string;
@@ -83,6 +90,13 @@ export default function PasswordResetPage() {
     }
   }
   
+   // Function to check password validity on input change
+   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    setIsPasswordValid(validatePassword(password));
+    checkPasswordsMatch();
+  };
+
   // Function to check if passwords match on input change
   const checkPasswordsMatch = () => {
     const password = document.querySelector('input[name="password"]') as HTMLInputElement;
@@ -154,7 +168,7 @@ export default function PasswordResetPage() {
                 pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
                 title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
                 className="w-full"
-                onChange={checkPasswordsMatch}
+                onChange={handlePasswordChange}
                 aria-required="true"
                 aria-describedby="password-hint"
               />
@@ -201,8 +215,8 @@ export default function PasswordResetPage() {
           <button 
             type="submit" 
             className="btn btn-primary w-full mt-6 font-bold"
-            disabled={!passwordsMatch}
-            aria-disabled={!passwordsMatch}
+            disabled={!passwordsMatch || !isPasswordValid}
+            aria-disabled={!passwordsMatch || !isPasswordValid}
             ref={resetPasswordRef}
           >
             Reset Password

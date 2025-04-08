@@ -22,10 +22,10 @@ export default function skillPhase(step: phase) {
 
     return (
         <tr>
-            <th className="text-sm md:text-base">{step.type}</th>
+            <th className="text-sm md:text-base text-primary">{step.type}</th>
             <td colSpan={2}>
                 <div className="flex flex-col gap-2.5 justify-center items-center">
-                    <h1 className="text-sm md:text-base lg:text-lg font-semibold text-center">{step.title}</h1>
+                    <h1 className="text-sm md:text-base lg:text-lg font-semibold text-center text-primary">{step.title}</h1>
                     <div className="collapse bg-base-100 border-base-300 border w-6/7">
                         <input type="checkbox" />
                         <div className="collapse-title font-bold text-sm text-center ">Objective</div>
@@ -39,12 +39,12 @@ export default function skillPhase(step: phase) {
                 </div>
             </td>
             <td>
-                <ul className="list-disc list-outside space-y-3">
+                <ul className="list-disc list-outside space-y-3 text-primary">
                     {freeResources}
                 </ul>
             </td>
             <td>
-                <ul className="list-disc list-outside space-y-3">
+                <ul className="list-disc list-outside space-y-3 text-primary">
                     {paidResources}
                 </ul>
             </td>
