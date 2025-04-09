@@ -4,7 +4,7 @@ An intelligent skill learning path generator.
 
 ## Overview
 
-FocusFlow helps users develop new skills by creating personalized learning paths with step-by-step guidance. The application breaks down complex skills into manageable tasks qnd lets users record their skills and work experience
+FocusFlow helps users develop new skills by creating personalized learning paths with step-by-step guidance. The application breaks down complex skills into manageable tasks and lets users record their skills and work experience
 
 ## Key Features
 
